@@ -1,14 +1,26 @@
-mod cli;
-mod colors;
-
-// use anyhow::Result;
-// use tunneled::{client::Client, server::Server};
-// use clap::{error::ErrorKind, CommandFactory, Parser, Subcommand};
+//! A modern, simple TCP tunnel in Rust that exposes local ports to a remote
+//! server, bypassing standard NAT connection firewalls.
+//!
+//! This is the library crate documentation. If you're looking for usage
+//! information about the binary, see the command below.
+//!
+//! ```shell
+//! $ tunneled help
+//! ```
+//!
+//! There are two components to the crate, offering implementations of the
+//! server network daemon and client local forwarding proxy. Both are public
+//! members and can be run programmatically with a Tokio 1.0 runtime.
 
 use crate::cli::ARGS;
 use crate::cli::args::Command;
 
-pub const VERSION: &str = "2.0.0";
+mod cli;
+mod colors;
+mod commands;
+mod statics;
+
+
 /*
 #[derive(Parser, Debug)]
 #[clap(author, version, about)]
@@ -88,7 +100,8 @@ async fn run(command: Command) -> Result<()> {
     Ok(())
 } */
 
-fn main() {
+#[tokio::main]
+async fn main() {
     match ARGS.command {
         Command::Local => {
 
@@ -96,8 +109,6 @@ fn main() {
         Command::Server => {
 
         }
-        Command::None => cli::sections::help_section()
+        Command::None => commands::help::help(),
     }
-    // tracing_subscriber::fmt::init();
-    // run(Args::parse().command)
 }
