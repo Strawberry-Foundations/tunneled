@@ -1,4 +1,4 @@
-# farms
-🕳 farms is a simple CLI tool for making local tcp tunnels
+# Strawberry Tunneled
+🕳 Tunneled is a simple CLI tool for making local tcp tunnels
 
-(Forked from https://github.com/ekzhang/bore)
+(Forked/Cloned from https://github.com/ekzhang/bore)
