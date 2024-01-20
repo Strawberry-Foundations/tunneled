@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 // Ported from stblib
 
 pub const BOLD: &str = "\x1b[1m";
