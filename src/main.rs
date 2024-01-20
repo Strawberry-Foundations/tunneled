@@ -1,7 +1,15 @@
-use anyhow::Result;
-use bore_cli::{client::Client, server::Server};
-use clap::{error::ErrorKind, CommandFactory, Parser, Subcommand};
+mod cli;
+mod colors;
 
+// use anyhow::Result;
+// use tunneled::{client::Client, server::Server};
+// use clap::{error::ErrorKind, CommandFactory, Parser, Subcommand};
+
+use crate::cli::ARGS;
+use crate::cli::args::Command;
+
+pub const VERSION: &str = "2.0.0";
+/*
 #[derive(Parser, Debug)]
 #[clap(author, version, about)]
 struct Args {
@@ -10,7 +18,7 @@ struct Args {
 }
 
 #[derive(Subcommand, Debug)]
-enum Command {
+ enum Command {
     /// Starts a local proxy to the remote server.
     Local {
         /// The local port to expose.
@@ -47,9 +55,9 @@ enum Command {
         #[clap(short, long, env = "BORE_SECRET", hide_env_values = true)]
         secret: Option<String>,
     },
-}
+} */
 
-#[tokio::main]
+/* #[tokio::main]
 async fn run(command: Command) -> Result<()> {
     match command {
         Command::Local {
@@ -78,9 +86,18 @@ async fn run(command: Command) -> Result<()> {
     }
 
     Ok(())
-}
+} */
 
-fn main() -> Result<()> {
-    tracing_subscriber::fmt::init();
-    run(Args::parse().command)
+fn main() {
+    match ARGS.command {
+        Command::Local => {
+
+        },
+        Command::Server => {
+
+        }
+        Command::None => cli::sections::help_section()
+    }
+    // tracing_subscriber::fmt::init();
+    // run(Args::parse().command)
 }
