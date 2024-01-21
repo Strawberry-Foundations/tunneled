@@ -60,6 +60,7 @@ impl Args {
         match args.command_str.as_str() {
             "local" => args.command = Command::Local,
             "server" => args.command = Command::Server,
+            "auth" => args.command = Command::Auth,
             _ => args.command = Command::None,
         }
 
