@@ -1,2 +1,3 @@
 pub mod help;
-mod client;
+placeholder filepub mod client;
+pub mod auth;
