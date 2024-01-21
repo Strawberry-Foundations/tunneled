@@ -4,6 +4,8 @@ use stblib::logging::Logger;
 use stblib::colors::{BLUE, BOLD, C_RESET, GREEN, RED, YELLOW};
 
 pub const VERSION: &str = "2.0.0";
+// pub const STRAWBERRY_ID_API: &str = "http://192.168.0.194:8082/v1/";
+pub const STRAWBERRY_ID_API: &str = "https://id.strawberryfoundations.xyz/v1/";
 
 lazy_static! {
     pub static ref LOGGER: Logger = Logger::new(
