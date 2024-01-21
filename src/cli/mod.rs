@@ -1,4 +1,5 @@
 pub mod args;
+pub mod server;
 
 use lazy_static::lazy_static;
 
