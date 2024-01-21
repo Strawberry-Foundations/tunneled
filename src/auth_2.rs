@@ -1,5 +1,6 @@
 //! Auth implementation for bore client and server.
 
+
 use anyhow::{bail, ensure, Result};
 use hmac::{Hmac, Mac};
 use sha2::{Digest, Sha256};
