@@ -13,9 +13,10 @@
 //! members and can be run programmatically with a Tokio 1.0 runtime.
 
 #![forbid(unsafe_code)]
-#![warn(missing_docs)]
+// #![warn(missing_docs)]
 
-pub mod auth;
+pub mod auth_2;
 pub mod client;
 pub mod server;
 pub mod shared;
+pub mod statics;
