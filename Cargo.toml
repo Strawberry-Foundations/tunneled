@@ -15,6 +15,7 @@ readme = "README.md"
 [dependencies]
 anyhow = { version = "1.0.56", features = ["backtrace"] }
 lazy_static = "1.4.0"
+stblib = "0.4.1"
 clap = { version = "4.0.22", features = ["derive", "env"] }
 dashmap = "5.2.0"
 fastrand = "2.0.1"
