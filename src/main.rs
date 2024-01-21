@@ -12,13 +12,14 @@
 //! server network daemon and client local forwarding proxy. Both are public
 //! members and can be run programmatically with a Tokio 1.0 runtime.
 use anyhow::Result;
+use stblib::colors::{BOLD, C_RESET, RED, RESET};
 
 use tunneled::client::Client;
 use tunneled::server::Server;
 
 use crate::cli::{ARGS, OPTIONS};
 use crate::cli::args::Command;
-use stblib::colors::{BOLD, C_RESET, RED, RESET};
+use crate::auth::strawberry_id::Auth;
 
 mod cli;
 mod commands;
@@ -43,6 +44,13 @@ async fn main() -> Result <()> {
                 eprintln!("{RED}{BOLD} ! {RESET} Port range is empty{C_RESET}");
             }
             Server::new(port_range, OPTIONS.server_options.secret.as_deref()).listen().await?;
+        }
+        Command::Auth => {
+            commands::auth::auth(Auth::strawberry_id()).await?;
+
+
+
+            // let id = auth.to_strawberry_id();
         }
         Command::None => commands::help::help(),
     }
