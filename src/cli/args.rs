@@ -4,6 +4,7 @@ use stblib::colors::{BOLD, C_RESET, RED, RESET};
 pub enum Command {
     Local,
     Server,
+    Auth,
     None
 }
 
@@ -127,7 +128,7 @@ impl Args {
                             match &self.command {
                                 Command::Local => options.client_options.secret = Option::from(secret),
                                 Command::Server => options.server_options.secret = Option::from(secret),
-                                Command::None => {  }
+                                _ => { }
                             }
 
                         } else {
