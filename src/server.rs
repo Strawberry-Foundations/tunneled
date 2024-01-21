@@ -10,8 +10,9 @@ use tokio::time::{sleep, timeout};
 use tracing::{info, info_span, warn, Instrument};
 use uuid::Uuid;
 
-use crate::auth::Authenticator;
+use crate::auth_2::Authenticator;
 use crate::shared::{proxy, ClientMessage, Delimited, ServerMessage, CONTROL_PORT};
+use crate::statics::LOGGER;
 
 /// State structure for the server.
 pub struct Server {
@@ -41,18 +42,18 @@ impl Server {
         let this = Arc::new(self);
         let addr = SocketAddr::from(([0, 0, 0, 0], CONTROL_PORT));
         let listener = TcpListener::bind(&addr).await?;
-        info!(?addr, "server listening");
+        LOGGER.info(format!("Server is listening on {addr}"));
 
         loop {
             let (stream, addr) = listener.accept().await?;
             let this = Arc::clone(&this);
             tokio::spawn(
                 async move {
-                    info!("incoming connection");
+                    LOGGER.info("Incoming connection");
                     if let Err(err) = this.handle_connection(stream).await {
-                        warn!(%err, "connection exited with error");
+                        LOGGER.warning(format!("Connection exited with error {err}"));
                     } else {
-                        info!("connection exited");
+                        LOGGER.info("Connection exited");
                     }
                 }
                 .instrument(info_span!("control", ?addr)),
