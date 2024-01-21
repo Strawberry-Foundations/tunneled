@@ -1,4 +1,4 @@
-use crate::colors::{C_RESET, GREEN, BOLD, UNDERLINE, CYAN, RESET, WHITE, RED, MAGENTA};
+use stblib::colors::{C_RESET, GREEN, BOLD, UNDERLINE, CYAN, RESET, WHITE, RED, MAGENTA};
 use crate::statics::VERSION;
 
 pub fn help() {
@@ -9,9 +9,12 @@ pub fn help() {
     {CYAN}{BOLD}help:{C_RESET} Prints this message
     {CYAN}{BOLD}about:{C_RESET} About Strawberry Tunneled
 
-    {CYAN}{BOLD}local:{C_RESET} Starts a local proxy to the remote server
+    {CYAN}{BOLD}local <port>:{C_RESET} Starts a local proxy to the remote server
      {BOLD}↳ {MAGENTA}Options:{C_RESET}
-            {CYAN}{BOLD}-s, --server <server>{C_RESET}   Select your target server for tunneling your traffic
+            {CYAN}{BOLD}-u, --use <server>{C_RESET}      Select your target server for tunneling your traffic
+            {CYAN}{BOLD}-l, --local-host <host>{C_RESET} The address to expose      {GREEN}{BOLD}[default: localhost]{C_RESET}
+            {CYAN}{BOLD}-p, --port <port>{C_RESET}       The port to expose         {GREEN}{BOLD}[optional]{C_RESET}
+            {CYAN}{BOLD}-s, --secret <port>{C_RESET}     Secret for authentication  {GREEN}{BOLD}[optional]{C_RESET}
 
     {CYAN}{BOLD}auth:{C_RESET} Authenticate with your Strawberry ID
      {BOLD}↳ {MAGENTA}Options:{C_RESET}
