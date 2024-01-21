@@ -1,5 +1,5 @@
 use std::env;
-use crate::colors::{BOLD, C_RESET, RED, RESET};
+use stblib::colors::{BOLD, C_RESET, RED, RESET};
 
 pub enum Command {
     Local,
@@ -11,6 +11,7 @@ pub enum Command {
 pub struct ServerOptions {
     pub min_port: u16,
     pub max_port: u16,
+    pub secret: Option<String>,
 }
 
 #[derive(Default)]
@@ -18,7 +19,7 @@ pub struct ClientOptions {
     pub host: String,
     pub port: u16,
     pub server: String,
-    pub secret: String,
+    pub secret: Option<String>,
 }
 
 
@@ -69,14 +70,16 @@ impl Args {
             server_options: ServerOptions {
                 min_port: 1024,
                 max_port: 65535,
+                secret: Some(String::new()),
             },
             client_options: ClientOptions {
                 host: String::from("localhost"),
                 port: 8080,
                 server: String::from("strawberryfoundations.xyz"),
-                secret: String::new()
+                secret: Some(String::new())
             }
         };
+
 
         let mut iter = self.args.clone().into_iter().skip(1);
 
@@ -121,7 +124,12 @@ impl Args {
                 "-s" | "--secret" => {
                     if let Some(val) = iter.next() {
                         if let Ok(secret) = val.parse::<String>() {
-                            options.client_options.secret = secret;
+                            match &self.command {
+                                Command::Local => options.client_options.secret = Option::from(secret),
+                                Command::Server => options.server_options.secret = Option::from(secret),
+                                Command::None => {  }
+                            }
+
                         } else {
                             eprintln!("{RED}{BOLD} ! {RESET} Invalid secret{C_RESET}");
                         }
