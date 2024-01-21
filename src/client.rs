@@ -7,7 +7,7 @@ use tokio::{io::AsyncWriteExt, net::TcpStream, time::timeout};
 use tracing::{error, info, info_span, warn, Instrument};
 use uuid::Uuid;
 
-use crate::auth::Authenticator;
+use crate::auth_2::Authenticator;
 use crate::shared::{
     proxy, ClientMessage, Delimited, ServerMessage, CONTROL_PORT, NETWORK_TIMEOUT,
 };
