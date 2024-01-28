@@ -4,15 +4,18 @@ use std::{io, net::SocketAddr, ops::RangeInclusive, sync::Arc, time::Duration};
 
 use anyhow::Result;
 use dashmap::DashMap;
+use stblib::colors::{BOLD, C_RESET, YELLOW};
 use tokio::io::AsyncWriteExt;
 use tokio::net::{TcpListener, TcpStream};
 use tokio::time::{sleep, timeout};
 use tracing::{info, info_span, warn, Instrument};
 use uuid::Uuid;
+use crate::auth::strawberry_id::StrawberryId;
 
 use crate::auth_2::Authenticator;
+use crate::cli::OPTIONS;
 use crate::shared::{proxy, ClientMessage, Delimited, ServerMessage, CONTROL_PORT};
-use crate::statics::LOGGER;
+use crate::statics::{LOGGER, STRAWBERRY_ID_API};
 
 /// State structure for the server.
 pub struct Server {
@@ -44,12 +47,17 @@ impl Server {
         let listener = TcpListener::bind(&addr).await?;
         LOGGER.info(format!("Server is listening on {addr}"));
 
+        if OPTIONS.server_options.require_id {
+            LOGGER.info(format!("Using Strawberry ID Authentication ({STRAWBERRY_ID_API})"));
+        }
+
         loop {
             let (stream, addr) = listener.accept().await?;
             let this = Arc::clone(&this);
             tokio::spawn(
                 async move {
-                    LOGGER.info("Incoming connection");
+                    LOGGER.info(format!("Incoming connection from {}", addr));
+
                     if let Err(err) = this.handle_connection(stream).await {
                         LOGGER.warning(format!("Connection exited with error {err}"));
                     } else {
@@ -113,7 +121,7 @@ impl Server {
                 warn!("unexpected authenticate");
                 Ok(())
             }
-            Some(ClientMessage::Hello(port)) => {
+            Some(ClientMessage::Hello(port, id)) => {
                 let listener = match self.create_listener(port).await {
                     Ok(listener) => listener,
                     Err(err) => {
@@ -124,7 +132,28 @@ impl Server {
 
                 let port = listener.local_addr()?.port();
 
-                LOGGER.info(format!("New Client listening at {port}"));
+                LOGGER.info(format!(" ↳ New Client listening at port {port}"));
+
+                if id.username != "#[<default_value>]" && id.token != "#[<default_value>]" {
+                    LOGGER.info(format!(" ↳ Received Strawberry ID Auth (@{})", id.username));
+                }
+                else {
+                    LOGGER.info(format!(" ↳ {YELLOW}{BOLD}!{C_RESET} Invalid Strawberry ID Auth (Client connected without Strawberry ID)"));
+                    stream.send(ServerMessage::Error("Invalid Strawberry ID".to_string())).await?;
+                }
+
+                let (sid, mut authenticator) = StrawberryId::authenticator(id.username, id.token);
+
+                let (auth_status, auth_credentials, strawberry_id) = authenticator.check_id(sid).await?;
+
+                if auth_status {
+                    LOGGER.info(format!(" ↳ Authentication successful ({} (@{}))", strawberry_id.full_name, strawberry_id.username));
+                }
+                else {
+                    LOGGER.info(format!(" ↳ {YELLOW}{BOLD}!{C_RESET} Invalid Strawberry ID Auth (@{})", auth_credentials.username));
+                    stream.send(ServerMessage::Error("Invalid Strawberry ID".to_string())).await?;
+                }
+
                 stream.send(ServerMessage::Hello(port)).await?;
 
                 loop {
@@ -165,10 +194,10 @@ impl Server {
                 }
                 Ok(())
             }
-            Some(ClientMessage::StrawberryId()) => {
+            None => {
+                LOGGER.warning("Client sent empty response");
                 Ok(())
-            }
-            None => Ok(()),
+            },
         }
     }
 }
