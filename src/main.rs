@@ -14,7 +14,7 @@
 use anyhow::Result;
 use stblib::colors::{BOLD, C_RESET, RED, RESET};
 
-use tunneled::client::Client;
+use crate::commands::client::Client;
 use tunneled::server::Server;
 
 use crate::cli::{ARGS, OPTIONS};
