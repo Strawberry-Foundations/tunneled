@@ -26,6 +26,8 @@ pub enum ClientMessage {
     /// Response to an authentication challenge from the server.
     Authenticate(String),
 
+    StrawberryId(),
+
     /// Initial client message specifying a port to forward.
     Hello(u16),
 
