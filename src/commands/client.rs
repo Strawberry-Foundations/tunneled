@@ -6,6 +6,7 @@ use anyhow::{bail, Context, Result};
 use tokio::{io::AsyncWriteExt, net::TcpStream, time::timeout};
 use tracing::{error, info, info_span, warn, Instrument};
 use uuid::Uuid;
+use crate::auth::id::IdAuth;
 
 use crate::auth_2::Authenticator;
 use crate::shared::{
@@ -28,9 +29,6 @@ pub struct Client {
     /// Local port that is forwarded.
     local_port: u16,
 
-    /// Port that is publicly available on the remote.
-    remote_port: u16,
-
     /// Optional secret used to authenticate clients.
     auth: Option<Authenticator>,
 }
@@ -38,18 +36,33 @@ pub struct Client {
 impl Client {
     /// Create a new client.
     pub async fn new(local_host: &str, local_port: u16, to: &str, port: u16, secret: Option<&str>) -> Result<Self> {
-        let mut stream = Delimited::new(connect_with_timeout(to, CONTROL_PORT).await?);
+        let mut stream = Delimited::new(connect_with_timeout(to, CONTROL_PORT).await.unwrap());
         let auth = secret.map(Authenticator::new);
 
         if let Some(auth) = &auth {
-            auth.client_handshake(&mut stream).await?;
+            auth.client_handshake(&mut stream).await.unwrap();
         }
 
-        stream.send(ClientMessage::Hello(port)).await?;
+        let id = if OPTIONS.client_options.auth {
+            IdAuth::new().unwrap_or_else(|_| {
+                IdAuth {
+                    username: "#[<default_value>]".to_string(),
+                    token: "#[<default_value>]".to_string(),
+                }
+            })
+        }
+        else {
+            IdAuth {
+                username: "#[<default_value>]".to_string(),
+                token: "#[<default_value>]".to_string(),
+            }
+        };
 
-        let remote_port = match stream.recv_timeout().await? {
+        stream.send(ClientMessage::Hello(port, id)).await.unwrap();
+
+        let remote_port = match stream.recv_timeout().await.unwrap() {
             Some(ServerMessage::Hello(remote_port)) => remote_port,
-            Some(ServerMessage::Error(message)) => bail!("server error: {message}"),
+            Some(ServerMessage::Error(message)) => bail!("Server Error: {message}"),
             Some(ServerMessage::Challenge(_)) => bail!("server requires authentication, but no client secret was provided"),
             Some(_) => bail!("unexpected initial non-hello message"),
             None => bail!("unexpected EOF"),
@@ -70,7 +83,6 @@ impl Client {
             to: to.to_string(),
             local_host: local_host.to_string(),
             local_port,
-            remote_port,
             auth,
         })
     }
