@@ -2,14 +2,17 @@
 
 use std::time::Duration;
 
-use anyhow::{Context, Result};
-use futures_util::{SinkExt, StreamExt};
-use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use tokio::io::{self, AsyncRead, AsyncWrite};
 use tokio::time::timeout;
 use tokio_util::codec::{AnyDelimiterCodec, Framed, FramedParts};
+
+use anyhow::{Context, Result};
+use futures_util::{SinkExt, StreamExt};
+use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use tracing::trace;
 use uuid::Uuid;
+
+use crate::auth::id::IdAuth;
 
 /// TCP port used for control connections with the server.
 pub const CONTROL_PORT: u16 = 7835;
@@ -26,10 +29,8 @@ pub enum ClientMessage {
     /// Response to an authentication challenge from the server.
     Authenticate(String),
 
-    StrawberryId(),
-
     /// Initial client message specifying a port to forward.
-    Hello(u16),
+    Hello(u16, IdAuth),
 
     /// Accepts an incoming TCP connection, using this stream as a proxy.
     Accept(Uuid),
