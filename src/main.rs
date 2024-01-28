@@ -37,9 +37,14 @@ async fn main() -> Result <()> {
                 &OPTIONS.client_options.host, OPTIONS.client_options.port,
                 &OPTIONS.client_options.server, 0,
                 OPTIONS.client_options.secret.as_deref()
-            ).await.unwrap();
+            ).await.unwrap_or_else(|err| {
+                eprintln!("{RED}{BOLD} ! {C_RESET} {err}");
+                std::process::exit(1);
+            });
 
-            client.listen().await.unwrap();
+            client.listen().await.unwrap_or_else(|err| {
+                eprintln!("{RED}{BOLD} ! {C_RESET} {err}")
+            });
         },
         Command::Server => {
             let port_range = OPTIONS.server_options.min_port..=OPTIONS.server_options.max_port;
