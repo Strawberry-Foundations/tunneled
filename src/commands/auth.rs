@@ -48,7 +48,7 @@ pub async fn auth(mut auth: StrawberryId) -> anyhow::Result<()> {
         if !credentials_path.exists() {
             let credentials = Credentials {
                 username: credentials.username.clone(),
-                token: credentials.username.clone(),
+                token: credentials.token.clone(),
             };
 
             match serde_yaml::to_string(&credentials) {
