@@ -7,10 +7,12 @@ use tokio::{io::AsyncWriteExt, net::TcpStream, time::timeout};
 use tracing::{error, info, info_span, warn, Instrument};
 use uuid::Uuid;
 
-use tunneled::auth_2::Authenticator;
-use tunneled::shared::{
+use crate::auth_2::Authenticator;
+use crate::shared::{
     proxy, ClientMessage, Delimited, ServerMessage, CONTROL_PORT, NETWORK_TIMEOUT,
 };
+use crate::cli::OPTIONS;
+use crate::statics::{LOGGER, LOGGER_2};
 
 /// State structure for the client.
 pub struct Client {
@@ -35,33 +37,33 @@ pub struct Client {
 
 impl Client {
     /// Create a new client.
-    pub async fn new(
-        local_host: &str,
-        local_port: u16,
-        to: &str,
-        port: u16,
-        secret: Option<&str>,
-    ) -> Result<Self> {
+    pub async fn new(local_host: &str, local_port: u16, to: &str, port: u16, secret: Option<&str>) -> Result<Self> {
         let mut stream = Delimited::new(connect_with_timeout(to, CONTROL_PORT).await?);
         let auth = secret.map(Authenticator::new);
+
         if let Some(auth) = &auth {
             auth.client_handshake(&mut stream).await?;
         }
 
         stream.send(ClientMessage::Hello(port)).await?;
+
         let remote_port = match stream.recv_timeout().await? {
             Some(ServerMessage::Hello(remote_port)) => remote_port,
             Some(ServerMessage::Error(message)) => bail!("server error: {message}"),
-            Some(ServerMessage::Challenge(_)) => {
-                bail!("server requires authentication, but no client secret was provided");
-            }
+            Some(ServerMessage::Challenge(_)) => bail!("server requires authentication, but no client secret was provided"),
             Some(_) => bail!("unexpected initial non-hello message"),
             None => bail!("unexpected EOF"),
         };
 
-        println!("{to}:{remote_port}");
-        info!(remote_port, "connected to server");
-        info!("listening at {to}:{remote_port}");
+        LOGGER.default(format!("Starting tunneling for {local_host}:{local_port}->{to}"));
+
+        if OPTIONS.client_options.auth {
+            LOGGER_2.info("Using Strawberry ID Authentication");
+        }
+
+
+        LOGGER.info(format!("Connected to server {to}"));
+        LOGGER.info(format!("Listening at {to}:{remote_port}"));
 
         Ok(Client {
             conn: Some(stream),
@@ -74,9 +76,9 @@ impl Client {
     }
 
     /// Returns the port publicly available on the remote.
-    pub fn remote_port(&self) -> u16 {
+    /* pub fn remote_port(&self) -> u16 {
         self.remote_port
-    }
+    } */
 
     /// Start the client, listening for new connections.
     pub async fn listen(mut self) -> Result<()> {
