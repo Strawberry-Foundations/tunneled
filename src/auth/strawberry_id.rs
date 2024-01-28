@@ -93,6 +93,10 @@ impl StrawberryIdAuthenticator {
         let auth = reqwest::get(format!("{STRAWBERRY_ID_API}api/auth?username={}&token={}", self.username.clone(), self.token.clone())).await?;
         let body = auth.text().await?;
 
+        if self.username == "#[<default_value>]" || self.token == "#[<default_value>]" || strawberry_id.token == "#[<default_value>]" || strawberry_id.username == "#[<default_value>]" {
+            return Ok((false, self, strawberry_id))
+        }
+
         if let Ok(data) = self.serializer(body.as_str()) {
             if data["data"] != "Invalid token" && data["data"] != "Invalid username" {
                 strawberry_id.full_name = data["data"]["full_name"].as_str().unwrap().to_string();
