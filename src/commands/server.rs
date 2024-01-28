@@ -139,7 +139,12 @@ impl Server {
                         LOGGER.info(format!(" ↳ Received Strawberry ID Auth (@{})", id.username));
                     } else {
                         LOGGER.info(format!(" ↳ {YELLOW}{BOLD}!{C_RESET} Invalid Strawberry ID Auth (Client connected without Strawberry ID)"));
-                        stream.send(ServerMessage::Error("Invalid Strawberry ID".to_string())).await?;
+                        stream.send(ServerMessage::Error(
+                            "This server requires a Strawberry ID which you didn't provide. \
+                            Please add the --auth Flag (and if not already done, log in with your Strawberry ID with tunneled auth)".to_string()
+                        )).await?;
+
+                        return Ok(())
                     }
 
                     let (sid, mut authenticator) = StrawberryId::authenticator(id.username, id.token);
