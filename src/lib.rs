@@ -16,7 +16,6 @@
 // #![warn(missing_docs)]
 
 pub mod auth_2;
-pub mod client;
 pub mod server;
 pub mod shared;
 pub mod statics;
