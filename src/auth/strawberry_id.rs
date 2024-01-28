@@ -12,6 +12,11 @@ pub struct StrawberryId {
     pub username: String,
 }
 
+pub struct IdAuth {
+    pub username: String,
+    pub token: String,
+}
+
 pub struct Auth;
 
 impl Auth {
