@@ -21,6 +21,7 @@ pub struct ClientOptions {
     pub port: u16,
     pub server: String,
     pub secret: Option<String>,
+    pub auth: bool,
 }
 
 
@@ -78,7 +79,8 @@ impl Args {
                 host: String::from("localhost"),
                 port: 8080,
                 server: String::from("strawberryfoundations.xyz"),
-                secret: Some(String::new())
+                secret: Some(String::new()),
+                auth: false,
             }
         };
 
@@ -162,6 +164,8 @@ impl Args {
                         eprintln!("{RED}{BOLD} ! {RESET} Missing maximal port{C_RESET}");
                     }
                 },
+
+                "-a" | "--auth" => options.client_options.auth = true,
 
                 _ => {
                     let port = arg.parse::<u16>().unwrap_or_else(|_| {
