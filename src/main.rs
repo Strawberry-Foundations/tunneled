@@ -15,7 +15,8 @@ use anyhow::Result;
 use stblib::colors::{BOLD, C_RESET, RED, RESET};
 
 use crate::commands::client::Client;
-use tunneled::server::Server;
+use crate::commands::server::Server;
+use crate::commands::auth::auth;
 
 use crate::cli::{ARGS, OPTIONS};
 use crate::cli::args::Command;
@@ -25,6 +26,8 @@ mod cli;
 mod commands;
 mod statics;
 mod auth;
+mod shared;
+mod auth_2;
 
 #[tokio::main]
 async fn main() -> Result <()> {
@@ -46,7 +49,7 @@ async fn main() -> Result <()> {
             Server::new(port_range, OPTIONS.server_options.secret.as_deref()).listen().await?;
         }
         Command::Auth => {
-            commands::auth::auth(Auth::strawberry_id()).await?;
+            auth(Auth::strawberry_id()).await?;
 
 
 
