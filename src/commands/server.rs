@@ -121,8 +121,10 @@ impl Server {
                         return Ok(());
                     }
                 };
+
                 let port = listener.local_addr()?.port();
-                info!(?port, "new client");
+
+                LOGGER.info(format!("New Client listening at {port}"));
                 stream.send(ServerMessage::Hello(port)).await?;
 
                 loop {
@@ -133,7 +135,7 @@ impl Server {
                     const TIMEOUT: Duration = Duration::from_millis(500);
                     if let Ok(result) = timeout(TIMEOUT, listener.accept()).await {
                         let (stream2, addr) = result?;
-                        info!(?addr, ?port, "new connection");
+                        LOGGER.info(format!("New Connection at {addr}:{port}"));
 
                         let id = Uuid::new_v4();
                         let conns = Arc::clone(&self.conns);
@@ -161,6 +163,9 @@ impl Server {
                     }
                     None => warn!(%id, "missing connection"),
                 }
+                Ok(())
+            }
+            Some(ClientMessage::StrawberryId()) => {
                 Ok(())
             }
             None => Ok(()),
