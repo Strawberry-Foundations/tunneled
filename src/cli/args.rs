@@ -13,6 +13,7 @@ pub struct ServerOptions {
     pub min_port: u16,
     pub max_port: u16,
     pub secret: Option<String>,
+    pub require_id: bool,
 }
 
 #[derive(Default)]
@@ -74,6 +75,7 @@ impl Args {
                 min_port: 1024,
                 max_port: 65535,
                 secret: Some(String::new()),
+                require_id: false,
             },
             client_options: ClientOptions {
                 host: String::from("localhost"),
@@ -166,6 +168,7 @@ impl Args {
                 },
 
                 "-a" | "--auth" => options.client_options.auth = true,
+                "-id" | "--require-id" => options.server_options.require_id = true,
 
                 _ => {
                     let port = arg.parse::<u16>().unwrap_or_else(|_| {
