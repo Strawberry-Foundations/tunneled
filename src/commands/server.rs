@@ -134,24 +134,24 @@ impl Server {
 
                 LOGGER.info(format!(" ↳ New Client listening at port {port}"));
 
-                if id.username != "#[<default_value>]" && id.token != "#[<default_value>]" {
-                    LOGGER.info(format!(" ↳ Received Strawberry ID Auth (@{})", id.username));
-                }
-                else {
-                    LOGGER.info(format!(" ↳ {YELLOW}{BOLD}!{C_RESET} Invalid Strawberry ID Auth (Client connected without Strawberry ID)"));
-                    stream.send(ServerMessage::Error("Invalid Strawberry ID".to_string())).await?;
-                }
+                if OPTIONS.server_options.require_id {
+                    if id.username != "#[<default_value>]" && id.token != "#[<default_value>]" {
+                        LOGGER.info(format!(" ↳ Received Strawberry ID Auth (@{})", id.username));
+                    } else {
+                        LOGGER.info(format!(" ↳ {YELLOW}{BOLD}!{C_RESET} Invalid Strawberry ID Auth (Client connected without Strawberry ID)"));
+                        stream.send(ServerMessage::Error("Invalid Strawberry ID".to_string())).await?;
+                    }
 
-                let (sid, mut authenticator) = StrawberryId::authenticator(id.username, id.token);
+                    let (sid, mut authenticator) = StrawberryId::authenticator(id.username, id.token);
 
-                let (auth_status, auth_credentials, strawberry_id) = authenticator.check_id(sid).await?;
+                    let (auth_status, auth_credentials, strawberry_id) = authenticator.check_id(sid).await?;
 
-                if auth_status {
-                    LOGGER.info(format!(" ↳ Authentication successful ({} (@{}))", strawberry_id.full_name, strawberry_id.username));
-                }
-                else {
-                    LOGGER.info(format!(" ↳ {YELLOW}{BOLD}!{C_RESET} Invalid Strawberry ID Auth (@{})", auth_credentials.username));
-                    stream.send(ServerMessage::Error("Invalid Strawberry ID".to_string())).await?;
+                    if auth_status {
+                        LOGGER.info(format!(" ↳ Authentication successful ({} (@{}))", strawberry_id.full_name, strawberry_id.username));
+                    } else {
+                        LOGGER.info(format!(" ↳ {YELLOW}{BOLD}!{C_RESET} Invalid Strawberry ID Auth (@{})", auth_credentials.username));
+                        stream.send(ServerMessage::Error("Invalid Strawberry ID".to_string())).await?;
+                    }
                 }
 
                 stream.send(ServerMessage::Hello(port)).await?;
