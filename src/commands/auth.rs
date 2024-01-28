@@ -1,6 +1,16 @@
-use stblib::colors::{BLUE, BOLD, C_RESET, CYAN, GREEN, RED, RESET};
+use std::fs;
+use serde::{Deserialize, Serialize};
+
+use stblib::colors::{BLUE, BOLD, C_RESET, CYAN, GREEN, RED, RESET, YELLOW};
+
 use crate::auth::strawberry_id::StrawberryId;
 use crate::statics::STRAWBERRY_ID_API;
+
+#[derive(Debug, Serialize, Deserialize)]
+struct Credentials {
+    username: String,
+    token: String,
+}
 
 pub async fn auth(mut auth: StrawberryId) -> anyhow::Result<()> {
     println!("{BOLD}{GREEN}--- Strawberry ID Login ---{C_RESET}");
@@ -24,6 +34,40 @@ pub async fn auth(mut auth: StrawberryId) -> anyhow::Result<()> {
     let credentials = auth.login(code).await?;
 
     println!("{GREEN}{BOLD}Logged in as {} (@{})", credentials.full_name, credentials.username);
+
+    if let Some(home_dir) = dirs::home_dir() {
+        let config_dir = home_dir.join(".config").join("tunneled");
+        let credentials_path = config_dir.join("credentials.yml");
+
+        if !config_dir.exists() {
+            if let Err(err) = fs::create_dir_all(&config_dir) {
+                eprintln!("{RED}{BOLD}Error while creating config directory:{RESET} {}{C_RESET}", err);
+            }
+        }
+
+        if !credentials_path.exists() {
+            let credentials = Credentials {
+                username: credentials.username.clone(),
+                token: credentials.username.clone(),
+            };
+
+            match serde_yaml::to_string(&credentials) {
+                Ok(credentials_str) => {
+                    if let Err(err) = fs::write(&credentials_path, credentials_str) {
+                        eprintln!("{RED}{BOLD}Error while writing file:{RESET} {}{C_RESET}", err);
+                    } else {
+                        println!("{GREEN}{BOLD}Credentials saved successfully to {:?}{C_RESET}", credentials_path);
+                    }
+                }
+                Err(err) => eprintln!("{RED}{BOLD}Error while serializing data:{RESET} {}{C_RESET}", err),
+            }
+        } else {
+            println!("{YELLOW}{BOLD}credentials.yml already exists at {:?}{C_RESET}", credentials_path);
+        }
+
+    } else {
+        eprintln!("{RED}{BOLD}Error while creating config directory:{RESET} Home directory not found.{C_RESET}");
+    }
 
     Ok(())
 }
