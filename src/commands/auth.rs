@@ -1,7 +1,7 @@
 use std::fs;
 use serde::{Deserialize, Serialize};
 
-use stblib::colors::{BLUE, BOLD, C_RESET, CYAN, GREEN, RED, RESET, YELLOW};
+use stblib::colors::{BLUE, BOLD, C_RESET, GREEN, RED, RESET, YELLOW};
 
 use crate::auth::strawberry_id::StrawberryId;
 use crate::statics::STRAWBERRY_ID_API;
