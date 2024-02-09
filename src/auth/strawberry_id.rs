@@ -43,18 +43,18 @@ impl StrawberryId {
         let mut interval = time::interval(Duration::from_secs(5));
 
         loop {
-            let response = reqwest::get(format!("{STRAWBERRY_ID_API}api/oauth_validate?code={code}")).await?;
+            let response = reqwest::get(format!("{STRAWBERRY_ID_API}api/oauth/callback?code={code}")).await?;
             let body = response.text().await?;
 
             if let Ok(data) = self.serializer(body.as_str()) {
-                if data["data"] != "Invalid Code" && data["data"] != "Not authenticated" {
+                if data["data"]["status"] != "Invalid Code" && data["data"]["status"] != "Not authenticated" {
                     println!("{GREEN}{BOLD}Authentication successful (Strawberry ID){C_RESET}");
 
-                    self.email = data["data"]["email"].as_str().unwrap().to_string();
-                    self.full_name = data["data"]["full_name"].as_str().unwrap().to_string();
-                    self.profile_picture = data["data"]["profile_picture_url"].as_str().unwrap().to_string();
-                    self.username = data["data"]["username"].as_str().unwrap().to_string();
-                    self.token = data["data"]["token"].as_str().unwrap().to_string();
+                    self.email = data["data"]["user"]["email"].as_str().unwrap().to_string();
+                    self.full_name = data["data"]["user"]["full_name"].as_str().unwrap().to_string();
+                    self.profile_picture = data["data"]["user"]["profile_picture_url"].as_str().unwrap().to_string();
+                    self.username = data["data"]["user"]["username"].as_str().unwrap().to_string();
+                    self.token = data["data"]["user"]["token"].as_str().unwrap().to_string();
 
                     break
                 }
@@ -98,11 +98,11 @@ impl StrawberryIdAuthenticator {
         }
 
         if let Ok(data) = self.serializer(body.as_str()) {
-            if data["data"] != "Invalid token" && data["data"] != "Invalid username" {
-                strawberry_id.full_name = data["data"]["full_name"].as_str().unwrap().to_string();
-                strawberry_id.email = data["data"]["email"].as_str().unwrap().to_string();
-                strawberry_id.profile_picture = data["data"]["profile_picture_url"].as_str().unwrap().to_string();
-                strawberry_id.username = data["data"]["username"].as_str().unwrap().to_string();
+            if data["data"]["status"] != "Invalid token" && data["data"]["status"] != "Invalid username" {
+                strawberry_id.full_name = data["data"]["user"]["full_name"].as_str().unwrap().to_string();
+                strawberry_id.email = data["data"]["user"]["email"].as_str().unwrap().to_string();
+                strawberry_id.profile_picture = data["data"]["user"]["profile_picture_url"].as_str().unwrap().to_string();
+                strawberry_id.username = data["data"]["user"]["username"].as_str().unwrap().to_string();
 
                 return Ok((true, self, strawberry_id));
             }
