@@ -15,7 +15,7 @@ struct Credentials {
 pub async fn auth(mut auth: StrawberryId) -> anyhow::Result<()> {
     println!("{BOLD}{GREEN}--- Strawberry ID Login ---{C_RESET}");
 
-    let request = reqwest::get(format!("{STRAWBERRY_ID_API}api/request_code")).await?;
+    let request = reqwest::get(format!("{STRAWBERRY_ID_API}api/request")).await?;
     let code = if request.status().is_success() {
         match request.text().await {
             Ok(code) => code,
@@ -29,7 +29,7 @@ pub async fn auth(mut auth: StrawberryId) -> anyhow::Result<()> {
         std::process::exit(1);
     };
 
-    println!("Go to {BOLD}{BLUE}{STRAWBERRY_ID_API}de/oauth/remote?service=tunneled{C_RESET} and enter the following code: {BOLD}{CYAN}{code}{C_RESET}");
+    println!("Go to {BOLD}{BLUE}{STRAWBERRY_ID_API}de/login?oauth=true&service=tunneled{C_RESET} and enter the following code: {BOLD}{CYAN}{code}{C_RESET}");
 
     let credentials = auth.login(code).await?;
 
