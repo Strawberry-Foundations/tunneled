@@ -29,7 +29,8 @@ pub async fn auth(mut auth: StrawberryId) -> anyhow::Result<()> {
         std::process::exit(1);
     };
 
-    println!("Go to {BOLD}{BLUE}{STRAWBERRY_ID_API}de/login?oauth=true&service=tunneled{C_RESET} and enter the following code: {BOLD}{CYAN}{code}{C_RESET}");
+    // println!("Go to {BOLD}{BLUE}{STRAWBERRY_ID_API}de/login?oauth=true&service=tunneled{C_RESET} and enter the following code: {BOLD}{CYAN}{code}{C_RESET}");
+    println!("Go to {BOLD}{BLUE}{STRAWBERRY_ID_API}de/login/oauth_dialog/tunneled?code={code}{C_RESET}");
 
     let credentials = auth.login(code).await?;
 
