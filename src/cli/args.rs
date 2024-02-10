@@ -14,6 +14,7 @@ pub struct ServerOptions {
     pub max_port: u16,
     pub secret: Option<String>,
     pub require_id: bool,
+    pub control_port: u16,
 }
 
 #[derive(Default)]
@@ -23,7 +24,7 @@ pub struct ClientOptions {
     pub server: String,
     pub secret: Option<String>,
     pub auth: bool,
-    pub remote_port: u16,
+    pub control_port: u16,
 }
 
 
@@ -77,6 +78,7 @@ impl Args {
                 max_port: 65535,
                 secret: Some(String::new()),
                 require_id: false,
+                control_port: 7835,
             },
             client_options: ClientOptions {
                 host: String::from("localhost"),
@@ -84,7 +86,7 @@ impl Args {
                 server: String::from("strawberryfoundations.xyz"),
                 secret: Some(String::new()),
                 auth: false,
-                remote_port: 7835
+                control_port: 7835,
             }
         };
 
@@ -117,15 +119,21 @@ impl Args {
                     }
                 },
 
-                "-rp" | "--remote-port" => {
+                "-cp" | "--control-port" => {
                     if let Some(val) = iter.next() {
                         if let Ok(port) = val.parse::<u16>() {
-                            options.client_options.remote_port = port;
+                            match &self.command {
+                                Command::Local => options.client_options.control_port = port,
+                                Command::Server => options.server_options.control_port = port,
+                                _ => { }
+                            }
+
+
                         } else {
-                            eprintln!("{RED}{BOLD} ! {RESET} Invalid remote port{C_RESET}");
+                            eprintln!("{RED}{BOLD} ! {RESET} Invalid control port{C_RESET}");
                         }
                     } else {
-                        eprintln!("{RED}{BOLD} ! {RESET} Missing remote port{C_RESET}");
+                        eprintln!("{RED}{BOLD} ! {RESET} Missing control port{C_RESET}");
                     }
                 },
 
