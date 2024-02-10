@@ -14,7 +14,7 @@ use crate::auth::strawberry_id::StrawberryId;
 
 use crate::auth_2::Authenticator;
 use crate::cli::OPTIONS;
-use crate::shared::{proxy, ClientMessage, Delimited, ServerMessage, CONTROL_PORT};
+use crate::shared::{proxy, ClientMessage, Delimited, ServerMessage};
 use crate::statics::{LOGGER, STRAWBERRY_ID_API};
 
 /// State structure for the server.
@@ -43,7 +43,7 @@ impl Server {
     /// Start the server, listening for new connections.
     pub async fn listen(self) -> Result<()> {
         let this = Arc::new(self);
-        let addr = SocketAddr::from(([0, 0, 0, 0], CONTROL_PORT));
+        let addr = SocketAddr::from(([0, 0, 0, 0], OPTIONS.server_options.control_port));
         let listener = TcpListener::bind(&addr).await?;
         LOGGER.info(format!("Server is listening on {addr}"));
 
