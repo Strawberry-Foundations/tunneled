@@ -23,6 +23,7 @@ pub struct ClientOptions {
     pub server: String,
     pub secret: Option<String>,
     pub auth: bool,
+    pub remote_port: u16,
 }
 
 
@@ -83,6 +84,7 @@ impl Args {
                 server: String::from("strawberryfoundations.xyz"),
                 secret: Some(String::new()),
                 auth: false,
+                remote_port: 7835
             }
         };
 
@@ -112,6 +114,18 @@ impl Args {
                         }
                     } else {
                         eprintln!("{RED}{BOLD} ! {RESET} Missing server{C_RESET}");
+                    }
+                },
+
+                "-rp" | "--remote-port" => {
+                    if let Some(val) = iter.next() {
+                        if let Ok(port) = val.parse::<u16>() {
+                            options.client_options.remote_port = port;
+                        } else {
+                            eprintln!("{RED}{BOLD} ! {RESET} Invalid remote port{C_RESET}");
+                        }
+                    } else {
+                        eprintln!("{RED}{BOLD} ! {RESET} Missing remote port{C_RESET}");
                     }
                 },
 
