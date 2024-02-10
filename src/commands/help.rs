@@ -16,6 +16,7 @@ pub fn help() {
             {CYAN}{BOLD}-p, --port <port>{C_RESET}       The port to expose                    {GREEN}{BOLD}[optional]{C_RESET}
             {CYAN}{BOLD}-s, --secret <secret>{C_RESET}   Secret for authentication             {GREEN}{BOLD}[optional]{C_RESET}
             {CYAN}{BOLD}-a, --auth{C_RESET}              Use Strawberry ID for Authentication  {GREEN}{BOLD}[optional]{C_RESET}
+            {CYAN}{BOLD}-rp, --remote-port{C_RESET}      Control port for remote proxy server  {GREEN}{BOLD}[optional]{C_RESET}
 
     {CYAN}{BOLD}auth:{C_RESET} Authenticate with your Strawberry ID
      {BOLD}↳ {MAGENTA}Options:{C_RESET}
