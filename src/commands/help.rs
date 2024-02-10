@@ -23,6 +23,8 @@ pub fn help() {
 
     {CYAN}{BOLD}server:{C_RESET} Runs the remote proxy server
      {BOLD}↳ {MAGENTA}Options:{C_RESET}
+            {CYAN}{BOLD}-s, --secret <secret>{C_RESET}   Secret for authentication                 {GREEN}{BOLD}[optional]{C_RESET}
+            {CYAN}{BOLD}-id, --require-id{C_RESET}       Enable Strawberry ID for Authentication   {GREEN}{BOLD}[optional]{C_RESET}
             {CYAN}{BOLD}--min-port <port>{C_RESET}       Minimum Port for the remote proxy server  {GREEN}{BOLD}[default: 1024]{C_RESET}
             {CYAN}{BOLD}--max-port <port>{C_RESET}       Maximum Port for the remote proxy server  {GREEN}{BOLD}[default: 65535]{C_RESET}
 
