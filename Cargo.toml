@@ -38,3 +38,8 @@ dirs = "5.0.1"
 lazy_static = "1.4.0"
 rstest = "0.18.2"
 tokio = { version = "1.17.0", features = ["sync"] }
+
+[profile.release]
+opt-level = 'z'
+strip = true
+lto = true
