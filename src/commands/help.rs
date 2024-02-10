@@ -16,7 +16,7 @@ pub fn help() {
             {CYAN}{BOLD}-p, --port <port>{C_RESET}       The port to expose                    {GREEN}{BOLD}[optional]{C_RESET}
             {CYAN}{BOLD}-s, --secret <secret>{C_RESET}   Secret for authentication             {GREEN}{BOLD}[optional]{C_RESET}
             {CYAN}{BOLD}-a, --auth{C_RESET}              Use Strawberry ID for Authentication  {GREEN}{BOLD}[optional]{C_RESET}
-            {CYAN}{BOLD}-cp, --control-port{C_RESET}     Control port for remote proxy server  {GREEN}{BOLD}[optional]{C_RESET}
+            {CYAN}{BOLD}-cp, --control-port{C_RESET}     Control port for remote proxy server  {GREEN}{BOLD}[default: 7835]{C_RESET}
 
     {CYAN}{BOLD}auth:{C_RESET} Authenticate with your Strawberry ID
      {BOLD}↳ {MAGENTA}Options:{C_RESET}
@@ -26,7 +26,7 @@ pub fn help() {
      {BOLD}↳ {MAGENTA}Options:{C_RESET}
             {CYAN}{BOLD}-s, --secret <secret>{C_RESET}   Secret for authentication                 {GREEN}{BOLD}[optional]{C_RESET}
             {CYAN}{BOLD}-id, --require-id{C_RESET}       Enable Strawberry ID for Authentication   {GREEN}{BOLD}[optional]{C_RESET}
-            {CYAN}{BOLD}-cp, --control-port{C_RESET}     Control port for proxy server             {GREEN}{BOLD}[optional]{C_RESET}
+            {CYAN}{BOLD}-cp, --control-port{C_RESET}     Control port for proxy server             {GREEN}{BOLD}[default: 7835]{C_RESET}
             {CYAN}{BOLD}--min-port <port>{C_RESET}       Minimum Port for the remote proxy server  {GREEN}{BOLD}[default: 1024]{C_RESET}
             {CYAN}{BOLD}--max-port <port>{C_RESET}       Maximum Port for the remote proxy server  {GREEN}{BOLD}[default: 65535]{C_RESET}
 
