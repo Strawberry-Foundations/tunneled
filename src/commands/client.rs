@@ -42,7 +42,7 @@ impl Client {
         }
 
         let id = if OPTIONS.client_options.auth {
-            StrawberryIdAuthenticator::fetch().unwrap_or_else(|_| {
+            StrawberryIdAuthenticator::fetch().unwrap_or({
                 StrawberryIdAuthenticator {
                     username: None,
                     token: None
