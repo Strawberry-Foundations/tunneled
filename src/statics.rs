@@ -16,6 +16,7 @@ lazy_static! {
             default: format!("{C_RESET}{BOLD}[%<time>%]{C_RESET} {BLUE}INIT{C_RESET}    [%<message>%]"),
             warning: format!("{C_RESET}{BOLD}[%<time>%]{C_RESET} {YELLOW}[%<levelname>%]{C_RESET} [%<message>%]"),
             critical: format!("{C_RESET}{BOLD}[%<time>%]{C_RESET} {RED}[%<levelname>%]{C_RESET} [%<message>%]"),
+            panic: format!("{C_RESET}{BOLD}[%<time>%]{C_RESET} {RED}[%<levelname>%]{C_RESET} [%<message>%]"),
             extensions: stblib::logging::formats::LogFormatExt {
                 time_fmt: "%Y-%m-%d %H:%M".to_string(),
                 levelname_lowercase: false
@@ -31,6 +32,7 @@ lazy_static! {
             default: format!("{C_RESET}{BOLD}[%<time>%]{C_RESET} {BLUE}INIT{C_RESET}    [%<message>%]"),
             warning: format!("{C_RESET}{BOLD}[%<time>%]{C_RESET} {YELLOW}[%<levelname>%]{C_RESET} [%<message>%]"),
             critical: format!("{C_RESET}{BOLD}[%<time>%]{C_RESET} {RED}[%<levelname>%]{C_RESET} [%<message>%]"),
+            panic: format!("{C_RESET}{BOLD}[%<time>%]{C_RESET} {RED}[%<levelname>%]{C_RESET} [%<message>%]"),
             extensions: stblib::logging::formats::LogFormatExt {
                 time_fmt: "%Y-%m-%d %H:%M".to_string(),
                 levelname_lowercase: false
