@@ -3,7 +3,7 @@ use lazy_static::lazy_static;
 use stblib::logging::Logger;
 use stblib::colors::{BLUE, BOLD, C_RESET, CYAN, GREEN, RED, YELLOW};
 
-pub const VERSION: &str = "2.2.2";
+pub const VERSION: &str = "2.3.0";
 // pub const STRAWBERRY_ID_API: &str = "http://192.168.0.194:8082/v1/";
 pub const STRAWBERRY_ID_API: &str = "https://id.strawberryfoundations.xyz/v2/";
 
