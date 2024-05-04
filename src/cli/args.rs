@@ -26,6 +26,7 @@ pub struct ClientOptions {
     pub secret: Option<String>,
     pub auth: bool,
     pub control_port: u16,
+    pub static_port: Option<u16>
 }
 
 
@@ -89,6 +90,7 @@ impl Args {
                 secret: Some(String::new()),
                 auth: false,
                 control_port: 7835,
+                static_port: None
             }
         };
 
@@ -136,6 +138,18 @@ impl Args {
                         }
                     } else {
                         eprintln!("{RED}{BOLD} ! {RESET} Missing control port{C_RESET}");
+                    }
+                },
+
+                "-sp" | "--static-port" => {
+                    if let Some(val) = iter.next() {
+                        if let Ok(port) = val.parse::<u16>() {
+                            options.client_options.static_port = Some(port)
+                        } else {
+                            eprintln!("{RED}{BOLD} ! {RESET} Invalid static port{C_RESET}");
+                        }
+                    } else {
+                        eprintln!("{RED}{BOLD} ! {RESET} Missing static port{C_RESET}");
                     }
                 },
 
