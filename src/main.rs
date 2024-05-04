@@ -13,6 +13,7 @@
 //! members and can be run programmatically with a Tokio 1.0 runtime.
 use anyhow::Result;
 use stblib::colors::{BOLD, C_RESET, RED, RESET};
+use crate::auth::Auth;
 
 use crate::commands::client::Client;
 use crate::commands::server::Server;
@@ -20,14 +21,13 @@ use crate::commands::auth::auth;
 
 use crate::cli::{ARGS, OPTIONS};
 use crate::cli::args::Command;
-use crate::auth::strawberry_id::Auth;
 
-mod cli;
-mod commands;
-mod statics;
-mod auth;
-mod shared;
-mod auth_2;
+pub mod cli;
+pub mod commands;
+pub mod statics;
+pub mod auth;
+pub mod shared;
+pub mod auth_2;
 
 #[tokio::main]
 async fn main() -> Result <()> {
