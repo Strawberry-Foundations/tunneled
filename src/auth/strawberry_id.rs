@@ -4,8 +4,11 @@ use tokio::time::{self, Duration};
 use serde_json::Value;
 
 use stblib::colors::{BOLD, C_RESET, GREEN};
+use crate::auth::authenticator::StrawberryIdAuthenticator;
 use crate::statics::STRAWBERRY_ID_API;
 
+
+#[derive(Debug, Default)]
 pub struct StrawberryId {
     pub email: String,
     pub full_name: String,
@@ -14,26 +17,10 @@ pub struct StrawberryId {
     pub token: String,
 }
 
-pub struct StrawberryIdAuthenticator {
-    pub username: String,
-    pub token: String,
-}
-
-pub struct Auth;
-
-impl Auth {
-    pub fn strawberry_id() -> StrawberryId {
-        StrawberryId {
-            email: String::new(),
-            full_name: String::new(),
-            profile_picture: String::new(),
-            username: String::new(),
-            token: String::new(),
-        }
-    }
-}
-
 impl StrawberryId {
+    pub fn new() {
+        
+    }
     fn serializer(&self, text: &str) -> Result<Value, serde_json::Error> {
         let serializer = serde_json::from_str(text)?;
         Ok(serializer)
@@ -66,48 +53,10 @@ impl StrawberryId {
         Ok(self)
     }
 
-    pub fn authenticator(username: String, token: String) -> (Self, StrawberryIdAuthenticator) {
-        (
-            Self {
-                email: "".to_string(),
-                full_name: "".to_string(),
-                profile_picture: "".to_string(),
-                username: username.clone(),
-                token: token.clone(),
-        },
+    pub fn authenticator(username: String, token: String) -> StrawberryIdAuthenticator {
             StrawberryIdAuthenticator {
-                username,
-                token,
+                username: Some(username),
+                token: Some(token),
             }
-        )
-    }
-}
-
-impl StrawberryIdAuthenticator {
-    fn serializer(&self, text: &str) -> Result<Value, serde_json::Error> {
-        let serializer = serde_json::from_str(text)?;
-        Ok(serializer)
-    }
-
-    pub async fn check_id(&mut self, mut strawberry_id: StrawberryId) -> anyhow::Result<(bool, &Self, StrawberryId)> {
-        let auth = reqwest::get(format!("{STRAWBERRY_ID_API}api/auth?username={}&token={}", self.username.clone(), self.token.clone())).await?;
-        let body = auth.text().await?;
-
-        if self.username == "#[<default_value>]" || self.token == "#[<default_value>]" || strawberry_id.token == "#[<default_value>]" || strawberry_id.username == "#[<default_value>]" {
-            return Ok((false, self, strawberry_id))
-        }
-
-        if let Ok(data) = self.serializer(body.as_str()) {
-            if data["data"]["status"] != "Invalid token" && data["data"]["status"] != "Invalid username" {
-                strawberry_id.full_name = data["data"]["user"]["full_name"].as_str().unwrap().to_string();
-                strawberry_id.email = data["data"]["user"]["email"].as_str().unwrap().to_string();
-                strawberry_id.profile_picture = data["data"]["user"]["profile_picture_url"].as_str().unwrap().to_string();
-                strawberry_id.username = data["data"]["user"]["username"].as_str().unwrap().to_string();
-
-                return Ok((true, self, strawberry_id));
-            }
-        }
-
-        Ok((false, self, strawberry_id))
     }
 }
