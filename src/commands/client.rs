@@ -3,6 +3,7 @@
 use std::sync::Arc;
 
 use anyhow::{bail, Context, Result};
+use stblib::colors::{BOLD, C_RESET, RED};
 use tokio::{io::AsyncWriteExt, net::TcpStream, time::timeout};
 use tracing::{error, info, info_span, warn, Instrument};
 use uuid::Uuid;
@@ -34,7 +35,11 @@ pub struct Client {
 impl Client {
     /// Create a new client.
     pub async fn new(local_host: &str, local_port: u16, to: &str, port: u16, secret: Option<&str>) -> Result<Self> {
-        let mut stream = Delimited::new(connect_with_timeout(to, OPTIONS.client_options.control_port).await.unwrap());
+        let mut stream = Delimited::new(connect_with_timeout(to, OPTIONS.client_options.control_port).await.unwrap_or_else(|err| {
+            eprintln!(" {RED}{BOLD}!{C_RESET}  Server Error: {err}");
+            std::process::exit(1)
+        }));
+
         let auth = secret.map(Authenticator::new);
 
         if let Some(auth) = &auth {
