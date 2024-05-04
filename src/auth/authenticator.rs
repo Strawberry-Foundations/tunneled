@@ -6,7 +6,7 @@ use stblib::colors::{BOLD, C_RESET, RED, RESET};
 use crate::auth::strawberry_id::StrawberryId;
 use crate::statics::STRAWBERRY_ID_API;
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Clone)]
 pub struct ClientAuthentication {
     pub status: bool,
     pub credentials: StrawberryIdAuthenticator,
