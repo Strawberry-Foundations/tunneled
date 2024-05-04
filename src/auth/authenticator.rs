@@ -1,5 +1,5 @@
 use std::fs;
-use anyhow::Error;
+
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use stblib::colors::{BOLD, C_RESET, RED, RESET};
@@ -65,6 +65,6 @@ impl StrawberryIdAuthenticator {
             }
         }
 
-        return Ok(None)
+        Ok(None)
     }
 }
