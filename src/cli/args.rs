@@ -60,7 +60,7 @@ impl Args {
 
         let parser: Vec<String> = env::args().skip(1).collect();
 
-        args.args = parser.clone();
+        args.args.clone_from(&parser);
         args.command_str = parser.clone().first().unwrap().to_string();
 
         match args.command_str.as_str() {
