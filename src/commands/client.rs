@@ -56,7 +56,7 @@ impl Client {
             None
         };
 
-        stream.send(ClientMessage::Hello(port, id, None)).await.unwrap();
+        stream.send(ClientMessage::Hello(port, id, OPTIONS.client_options.static_port)).await.unwrap();
 
         let remote_port = match stream.recv_timeout().await.unwrap() {
             Some(ServerMessage::Hello(remote_port)) => remote_port,
