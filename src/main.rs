@@ -55,11 +55,8 @@ async fn main() -> Result <()> {
         }
         Command::Auth => {
             auth(Auth::strawberry_id()).await?;
-
-
-
-            // let id = auth.to_strawberry_id();
         }
+        Command::About => commands::about::about(),
         Command::None => commands::help::help(),
     }
 
