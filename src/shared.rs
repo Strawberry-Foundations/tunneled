@@ -12,7 +12,7 @@ use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use tracing::trace;
 use uuid::Uuid;
 
-use crate::auth::id::IdAuth;
+use crate::auth::authenticator::StrawberryIdAuthenticator;
 
 /// Maximum byte length for a JSON frame in the stream.
 pub const MAX_FRAME_LENGTH: usize = 256;
@@ -27,7 +27,7 @@ pub enum ClientMessage {
     Authenticate(String),
 
     /// Initial client message specifying a port to forward.
-    Hello(u16, IdAuth),
+    Hello(u16, StrawberryIdAuthenticator),
 
     /// Accepts an incoming TCP connection, using this stream as a proxy.
     Accept(Uuid),
