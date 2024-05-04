@@ -89,7 +89,11 @@ impl Server {
                 if whitelist.contains(&&*id.strawberry_id.email) {
                     match try_bind(static_port).await {
                         Ok(listener) => Ok(listener),
-                        Err(_) => Err("Port is not available"),
+                        Err(err) => {
+                            LOGGER.error(format!("Failed to bind to port: {err}"));
+                            
+                            Err("Port is not available")
+                        },
                     }
                 }
                 else {
