@@ -6,7 +6,7 @@ use anyhow::{bail, Context, Result};
 use tokio::{io::AsyncWriteExt, net::TcpStream, time::timeout};
 use tracing::{error, info, info_span, warn, Instrument};
 use uuid::Uuid;
-use crate::auth::id::IdAuth;
+use crate::auth::authenticator::StrawberryIdAuthenticator;
 
 use crate::auth_2::Authenticator;
 use crate::shared::{proxy, ClientMessage, Delimited, ServerMessage, NETWORK_TIMEOUT};
@@ -42,17 +42,17 @@ impl Client {
         }
 
         let id = if OPTIONS.client_options.auth {
-            IdAuth::new().unwrap_or_else(|_| {
-                IdAuth {
-                    username: "#[<default_value>]".to_string(),
-                    token: "#[<default_value>]".to_string(),
+            StrawberryIdAuthenticator::fetch().unwrap_or_else(|_| {
+                StrawberryIdAuthenticator {
+                    username: None,
+                    token: None
                 }
             })
         }
         else {
-            IdAuth {
-                username: "#[<default_value>]".to_string(),
-                token: "#[<default_value>]".to_string(),
+            StrawberryIdAuthenticator {
+                username: None,
+                token: None,
             }
         };
 
