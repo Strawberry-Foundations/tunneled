@@ -129,8 +129,6 @@ impl Server {
             }
             Err("failed to find an available port")
         }
-
-
     }
 
     async fn handle_connection(&self, stream: TcpStream) -> Result<()> {
