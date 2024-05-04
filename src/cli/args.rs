@@ -147,9 +147,11 @@ impl Args {
                             options.client_options.static_port = Some(port)
                         } else {
                             eprintln!("{RED}{BOLD} ! {RESET} Invalid static port{C_RESET}");
+                            std::process::exit(1);
                         }
                     } else {
                         eprintln!("{RED}{BOLD} ! {RESET} Missing static port{C_RESET}");
+                        std::process::exit(1);
                     }
                 },
 
