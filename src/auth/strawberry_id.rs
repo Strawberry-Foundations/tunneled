@@ -18,9 +18,6 @@ pub struct StrawberryId {
 }
 
 impl StrawberryId {
-    pub fn new() {
-        
-    }
     fn serializer(&self, text: &str) -> Result<Value, serde_json::Error> {
         let serializer = serde_json::from_str(text)?;
         Ok(serializer)
