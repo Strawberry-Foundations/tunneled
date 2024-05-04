@@ -5,6 +5,7 @@ pub enum Command {
     Local,
     Server,
     Auth,
+    About,
     None
 }
 
@@ -65,6 +66,7 @@ impl Args {
             "local" => args.command = Command::Local,
             "server" => args.command = Command::Server,
             "auth" => args.command = Command::Auth,
+            "about" => args.command = Command::About,
             _ => args.command = Command::None,
         }
 
