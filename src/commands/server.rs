@@ -10,7 +10,7 @@ use tokio::net::{TcpListener, TcpStream};
 use tokio::time::{sleep, timeout};
 use tracing::{info, info_span, warn, Instrument};
 use uuid::Uuid;
-use crate::auth::strawberry_id::StrawberryId;
+
 
 use crate::auth_2::Authenticator;
 use crate::cli::OPTIONS;
@@ -135,7 +135,7 @@ impl Server {
                 LOGGER.info(format!(" ↳ New Client listening at port {port}"));
 
                 if OPTIONS.server_options.require_id {
-                    if id.username == None && id.token == None {
+                    if id.username.is_none() && id.token.is_none() {
                         LOGGER.info(format!(" ↳ {YELLOW}{BOLD}!{C_RESET} Invalid Strawberry ID Auth (Client connected without Strawberry ID)"));
                         stream.send(ServerMessage::Error(
                             "This server requires a Strawberry ID which you didn't provide. \
