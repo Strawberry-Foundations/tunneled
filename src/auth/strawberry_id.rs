@@ -8,7 +8,7 @@ use crate::auth::authenticator::StrawberryIdAuthenticator;
 use crate::statics::STRAWBERRY_ID_API;
 
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Clone)]
 pub struct StrawberryId {
     pub email: String,
     pub full_name: String,
