@@ -155,7 +155,7 @@ impl Args {
                     }
                 },
 
-                "-a" | "--address" => {
+                "-h" | "--address" => {
                     if let Some(val) = iter.next() {
                         if let Ok(host) = val.parse::<String>() {
                             options.client_options.host = host;
