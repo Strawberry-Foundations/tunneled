@@ -9,7 +9,7 @@ use tracing::{error, info, info_span, warn, Instrument};
 use uuid::Uuid;
 use crate::auth::authenticator::StrawberryIdAuthenticator;
 
-use crate::auth_2::Authenticator;
+use crate::auth::secret::Authenticator;
 use crate::shared::{proxy, ClientMessage, Delimited, ServerMessage, NETWORK_TIMEOUT};
 use crate::cli::OPTIONS;
 use crate::statics::{LOGGER, LOGGER_2};
