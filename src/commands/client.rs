@@ -12,7 +12,7 @@ use crate::auth::authenticator::StrawberryIdAuthenticator;
 use crate::auth::secret::Authenticator;
 use crate::shared::{proxy, ClientMessage, Delimited, ServerMessage, NETWORK_TIMEOUT};
 use crate::cli::OPTIONS;
-use crate::statics::{LOGGER, LOGGER_2};
+use crate::statics::{LOGGER, LOGGER_2, VERSION};
 
 /// State structure for the client.
 pub struct Client {
@@ -66,6 +66,7 @@ impl Client {
             None => bail!("Server Error: unexpected EOF"),
         };
 
+        LOGGER_2.default(format!("Starting Tunneled client v{}", VERSION.to_string()));
         LOGGER.default(format!("Starting tunneling for {local_host}:{local_port}->{to}"));
 
         if OPTIONS.client_options.auth {
