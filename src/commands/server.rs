@@ -16,7 +16,7 @@ use crate::auth::authenticator::{ClientAuthentication};
 use crate::auth::secret::Authenticator;
 use crate::cli::OPTIONS;
 use crate::shared::{proxy, ClientMessage, Delimited, ServerMessage};
-use crate::statics::{LOGGER, STRAWBERRY_ID_API};
+use crate::statics::{LOGGER, LOGGER_2, STRAWBERRY_ID_API, VERSION};
 
 /// State structure for the server.
 pub struct Server {
@@ -46,6 +46,8 @@ impl Server {
         let this = Arc::new(self);
         let addr = SocketAddr::from(([0, 0, 0, 0], OPTIONS.server_options.control_port));
         let listener = TcpListener::bind(&addr).await?;
+
+        LOGGER_2.default(format!("Tunneled Server v{VERSION}"));
         LOGGER.info(format!("Server is listening on {addr}"));
 
         if OPTIONS.server_options.require_id {
