@@ -27,7 +27,6 @@ pub mod commands;
 pub mod statics;
 pub mod auth;
 pub mod shared;
-pub mod auth_2;
 
 #[tokio::main]
 async fn main() -> Result <()> {
