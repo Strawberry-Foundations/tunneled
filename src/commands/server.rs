@@ -13,7 +13,7 @@ use tracing::{info, info_span, warn, Instrument};
 use uuid::Uuid;
 
 use crate::auth::authenticator::{ClientAuthentication};
-use crate::auth_2::Authenticator;
+use crate::auth::secret::Authenticator;
 use crate::cli::OPTIONS;
 use crate::shared::{proxy, ClientMessage, Delimited, ServerMessage};
 use crate::statics::{LOGGER, STRAWBERRY_ID_API};
