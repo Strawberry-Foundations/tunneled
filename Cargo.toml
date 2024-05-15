@@ -34,11 +34,6 @@ tracing-subscriber = "0.3.18"
 uuid = { version = "1.8.0", features = ["serde", "v4"] }
 dirs = "5.0.1"
 
-[dev-dependencies]
-lazy_static = "1.4.0"
-rstest = "0.19.0"
-tokio = { version = "1.37.0", features = ["sync"] }
-
 [profile.release]
 opt-level = 'z'
 strip = true
