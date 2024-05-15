@@ -8,6 +8,7 @@ pub fn help() {
 {MAGENTA}{BOLD}Commands:{C_RESET}
     {CYAN}{BOLD}help:{C_RESET} Prints this message
     {CYAN}{BOLD}about:{C_RESET} About Strawberry Tunneled
+    {CYAN}{BOLD}auth:{C_RESET} Authenticate with your Strawberry ID
 
     {CYAN}{BOLD}local <port>:{C_RESET} Starts a local proxy to the remote server
      {BOLD}↳ {MAGENTA}Options:{C_RESET}
@@ -18,10 +19,6 @@ pub fn help() {
             {CYAN}{BOLD}-a, --auth{C_RESET}              Use Strawberry ID for Authentication  {GREEN}{BOLD}[optional]{C_RESET}
             {CYAN}{BOLD}-cp, --control-port{C_RESET}     Control port for remote proxy server  {GREEN}{BOLD}[default: 7835]{C_RESET}
             {CYAN}{BOLD}-sp, --static-port{C_RESET}      Static port forwarding (whitelist)    {GREEN}{BOLD}[optional]{C_RESET}
-
-    {CYAN}{BOLD}auth:{C_RESET} Authenticate with your Strawberry ID
-     {BOLD}↳ {MAGENTA}Options:{C_RESET}
-            {CYAN}{BOLD}-???, --???{C_RESET}             ???
 
     {CYAN}{BOLD}server:{C_RESET} Runs the remote proxy server
      {BOLD}↳ {MAGENTA}Options:{C_RESET}
