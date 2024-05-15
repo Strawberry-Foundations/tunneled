@@ -47,7 +47,7 @@ impl Server {
         let addr = SocketAddr::from(([0, 0, 0, 0], OPTIONS.server_options.control_port));
         let listener = TcpListener::bind(&addr).await?;
 
-        LOGGER_2.default(format!("Starting Tunneled server v{}", VERSION.to_string()));
+        LOGGER_2.default(format!("Starting Tunneled server v{}", *VERSION));
         LOGGER.info(format!("Server is listening on {addr}"));
 
         if OPTIONS.server_options.require_id {
