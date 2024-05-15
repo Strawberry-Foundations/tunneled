@@ -2,8 +2,8 @@
 
 use tokio::time::{self, Duration};
 use serde_json::Value;
-
 use stblib::colors::{BOLD, C_RESET, GREEN};
+
 use crate::auth::authenticator::StrawberryIdAuthenticator;
 use crate::statics::STRAWBERRY_ID_API;
 
