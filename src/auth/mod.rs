@@ -2,6 +2,7 @@ use crate::auth::strawberry_id::StrawberryId;
 
 pub mod strawberry_id;
 pub mod authenticator;
+pub mod secret;
 
 pub struct Auth;
 
