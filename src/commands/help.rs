@@ -3,7 +3,7 @@ use crate::statics::VERSION;
 
 pub fn help() {
     println!("\
-{BOLD}{CYAN}{UNDERLINE}Strawberry Tunneled v{VERSION}{C_RESET}\n\
+{BOLD}{CYAN}{UNDERLINE}Strawberry Tunneled v{}{C_RESET}\n\
 {GREEN}{BOLD}Usage:{RESET} {WHITE}tunneled {CYAN}[command] {RED}[<options>]{C_RESET}\n\n\
 {MAGENTA}{BOLD}Commands:{C_RESET}
     {CYAN}{BOLD}help:{C_RESET} Prints this message
@@ -28,6 +28,6 @@ pub fn help() {
             {CYAN}{BOLD}--min-port <port>{C_RESET}       Minimum Port for the remote proxy server  {GREEN}{BOLD}[default: 1024]{C_RESET}
             {CYAN}{BOLD}--max-port <port>{C_RESET}       Maximum Port for the remote proxy server  {GREEN}{BOLD}[default: 65535]{C_RESET}
 
-");
+", VERSION.to_string());
     std::process::exit(0);
 }
