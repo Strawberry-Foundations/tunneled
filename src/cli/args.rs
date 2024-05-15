@@ -155,15 +155,15 @@ impl Args {
                     }
                 },
 
-                "-l" | "--local-host" => {
+                "-a" | "--address" => {
                     if let Some(val) = iter.next() {
                         if let Ok(host) = val.parse::<String>() {
                             options.client_options.host = host;
                         } else {
-                            eprintln!("{RED}{BOLD} ! {RESET} Invalid local host{C_RESET}");
+                            eprintln!("{RED}{BOLD} ! {RESET} Invalid address{C_RESET}");
                         }
                     } else {
-                        eprintln!("{RED}{BOLD} ! {RESET} Missing local host{C_RESET}");
+                        eprintln!("{RED}{BOLD} ! {RESET} Missing address{C_RESET}");
                     }
                 },
 
@@ -188,10 +188,10 @@ impl Args {
                         if let Ok(min_port) = val.parse::<u16>() {
                             options.server_options.min_port = min_port;
                         } else {
-                            eprintln!("{RED}{BOLD} ! {RESET} Invalid minimal port{C_RESET}");
+                            eprintln!("{RED}{BOLD} ! {RESET} Invalid minimum port{C_RESET}");
                         }
                     } else {
-                        eprintln!("{RED}{BOLD} ! {RESET} Missing minimal port{C_RESET}");
+                        eprintln!("{RED}{BOLD} ! {RESET} Missing minimum port{C_RESET}");
                     }
                 },
 
@@ -200,10 +200,10 @@ impl Args {
                         if let Ok(max_port) = val.parse::<u16>() {
                             options.server_options.max_port = max_port;
                         } else {
-                            eprintln!("{RED}{BOLD} ! {RESET} Invalid maximal port{C_RESET}");
+                            eprintln!("{RED}{BOLD} ! {RESET} Invalid maximum port{C_RESET}");
                         }
                     } else {
-                        eprintln!("{RED}{BOLD} ! {RESET} Missing maximal port{C_RESET}");
+                        eprintln!("{RED}{BOLD} ! {RESET} Missing maximum port{C_RESET}");
                     }
                 },
 
