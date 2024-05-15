@@ -7,8 +7,8 @@ use stblib::colors::{BOLD, C_RESET, RED};
 use tokio::{io::AsyncWriteExt, net::TcpStream, time::timeout};
 use tracing::{error, info, info_span, warn, Instrument};
 use uuid::Uuid;
-use crate::auth::authenticator::StrawberryIdAuthenticator;
 
+use crate::auth::authenticator::StrawberryIdAuthenticator;
 use crate::auth::secret::Authenticator;
 use crate::shared::{proxy, ClientMessage, Delimited, ServerMessage, NETWORK_TIMEOUT};
 use crate::cli::OPTIONS;
