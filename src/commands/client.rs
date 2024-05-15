@@ -66,7 +66,6 @@ impl Client {
             None => bail!("Server Error: unexpected EOF"),
         };
 
-        LOGGER_2.default(format!("Starting Tunneled client v{}", VERSION.to_string()));
         LOGGER.default(format!("Starting tunneling for {local_host}:{local_port}->{to}"));
 
         if OPTIONS.client_options.auth {
