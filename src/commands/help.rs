@@ -28,6 +28,6 @@ pub fn help() {
             {CYAN}{BOLD}--min-port <port>{C_RESET}       Minimum Port for the remote proxy server  {GREEN}{BOLD}[default: 1024]{C_RESET}
             {CYAN}{BOLD}--max-port <port>{C_RESET}       Maximum Port for the remote proxy server  {GREEN}{BOLD}[default: 65535]{C_RESET}
 
-", VERSION.to_string());
+", *VERSION);
     std::process::exit(0);
 }
