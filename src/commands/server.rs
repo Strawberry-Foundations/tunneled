@@ -5,7 +5,7 @@ use std::{io, net::SocketAddr, ops::RangeInclusive, sync::Arc, time::Duration};
 
 use anyhow::Result;
 use dashmap::DashMap;
-use stblib::colors::{BOLD, C_RESET, YELLOW};
+use stblib::colors::{BOLD, C_RESET, MAGENTA, RESET, YELLOW};
 use tokio::io::AsyncWriteExt;
 use tokio::net::{TcpListener, TcpStream};
 use tokio::time::{sleep, timeout};
@@ -57,12 +57,12 @@ impl Server {
             let this = Arc::clone(&this);
             tokio::spawn(
                 async move {
-                    LOGGER.info(format!("Incoming connection from {}", addr));
+                    LOGGER.info(format!("[{MAGENTA}{addr}{RESET}] Incoming connection"));
 
                     if let Err(err) = this.handle_connection(stream).await {
-                        LOGGER.warning(format!("Connection exited with error {err}"));
+                        LOGGER.warning(format!("[{MAGENTA}{addr}{RESET}] Connection exited with error {err}"));
                     } else {
-                        LOGGER.info("Connection exited");
+                        LOGGER.info(format!("[{MAGENTA}{addr}{RESET}] Connection exited"));
                     }
                 }
                 .instrument(info_span!("control", ?addr)),
@@ -189,7 +189,7 @@ impl Server {
 
                 let port = listener.local_addr()?.port();
 
-                LOGGER.info(format!(" ↳ New Client listening at port {port}"));
+                LOGGER.info(format!(" ↳ New client listening at port {port}"));
 
                 stream.send(ServerMessage::Hello(port)).await?;
 
@@ -201,7 +201,7 @@ impl Server {
                     const TIMEOUT: Duration = Duration::from_millis(500);
                     if let Ok(result) = timeout(TIMEOUT, listener.accept()).await {
                         let (stream2, addr) = result?;
-                        LOGGER.info(format!("New Connection at {addr}:{port}"));
+                        LOGGER.info(format!("New connection at {addr}:{port}"));
 
                         let id = Uuid::new_v4();
                         let conns = Arc::clone(&self.conns);
@@ -211,7 +211,7 @@ impl Server {
                             // Remove stale entries to avoid memory leaks.
                             sleep(Duration::from_secs(10)).await;
                             if conns.remove(&id).is_some() {
-                                warn!(%id, "removed stale connection");
+                                warn!(%id, "Removed stale connection");
                             }
                         });
                         stream.send(ServerMessage::Connection(id)).await?;
@@ -219,15 +219,15 @@ impl Server {
                 }
             }
             Some(ClientMessage::Accept(id)) => {
-                info!(%id, "forwarding connection");
+                info!(%id, "Forwarding connection");
                 match self.conns.remove(&id) {
                     Some((_, mut stream2)) => {
                         let parts = stream.into_parts();
-                        debug_assert!(parts.write_buf.is_empty(), "framed write buffer not empty");
+                        debug_assert!(parts.write_buf.is_empty(), "Framed write buffer not empty");
                         stream2.write_all(&parts.read_buf).await?;
                         proxy(parts.io, stream2).await?
                     }
-                    None => warn!(%id, "missing connection"),
+                    None => warn!(%id, "Missing connection"),
                 }
                 Ok(())
             }
