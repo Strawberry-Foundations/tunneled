@@ -47,11 +47,11 @@ impl Server {
         let addr = SocketAddr::from(([0, 0, 0, 0], OPTIONS.server_options.control_port));
         let listener = TcpListener::bind(&addr).await?;
 
-        LOGGER_2.default(format!("Tunneled Server v{VERSION}"));
+        LOGGER_2.default(format!("Starting Tunneled server v{VERSION}"));
         LOGGER.info(format!("Server is listening on {addr}"));
 
         if OPTIONS.server_options.require_id {
-            LOGGER.info(format!("Using Strawberry ID Authentication ({STRAWBERRY_ID_API})"));
+            LOGGER_2.info(format!("Using Strawberry ID Authentication ({STRAWBERRY_ID_API})"));
         }
 
         loop {
