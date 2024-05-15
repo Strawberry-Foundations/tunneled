@@ -57,10 +57,10 @@ impl Authenticator {
         stream.send(ServerMessage::Challenge(challenge)).await?;
         match stream.recv_timeout().await? {
             Some(ClientMessage::Authenticate(tag)) => {
-                ensure!(self.validate(&challenge, &tag), "invalid secret");
+                ensure!(self.validate(&challenge, &tag), "Server requires secret, but no client secret was provided");
                 Ok(())
             }
-            _ => bail!("server requires secret, but no secret was provided"),
+            _ => bail!("Server requires secret, but no client secret was provided"),
         }
     }
 
