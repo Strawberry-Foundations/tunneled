@@ -61,9 +61,9 @@ impl Client {
         let remote_port = match stream.recv_timeout().await.unwrap() {
             Some(ServerMessage::Hello(remote_port)) => remote_port,
             Some(ServerMessage::Error(message)) => bail!("Server Error: {message}"),
-            Some(ServerMessage::Challenge(_)) => bail!("server requires authentication, but no client secret was provided"),
-            Some(_) => bail!("unexpected initial non-hello message"),
-            None => bail!("unexpected EOF"),
+            Some(ServerMessage::Challenge(_)) => bail!("Server Error: Server requires authentication, but no client secret was provided"),
+            Some(_) => bail!("Server Error: unexpected initial non-hello message"),
+            None => bail!("Server Error: unexpected EOF"),
         };
 
         LOGGER.default(format!("Starting tunneling for {local_host}:{local_port}->{to}"));
