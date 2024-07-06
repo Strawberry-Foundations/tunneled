@@ -86,7 +86,7 @@ impl Args {
             client_options: ClientOptions {
                 host: String::from("localhost"),
                 port: 8080,
-                server: String::from("strawberryfoundations.xyz"),
+                server: String::from("strawberryfoundations.org"),
                 secret: Some(String::new()),
                 auth: false,
                 control_port: 7835,
