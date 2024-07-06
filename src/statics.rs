@@ -5,7 +5,7 @@ use stblib::colors::{BLUE, BOLD, C_RESET, CYAN, GREEN, RED, YELLOW};
 
 // pub const VERSION: &str = "2.3.1";
 // pub const STRAWBERRY_ID_API: &str = "http://192.168.0.194:8082/v1/";
-pub const STRAWBERRY_ID_API: &str = "https://id.strawberryfoundations.xyz/v2/";
+pub const STRAWBERRY_ID_API: &str = "https://id.strawberryfoundations.org/v2/";
 
 lazy_static! {
     pub static ref VERSION: String = env!("CARGO_PKG_VERSION").to_string();
