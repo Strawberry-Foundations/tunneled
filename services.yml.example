@@ -1,10 +1,6 @@
 services:
-  - name: ssh-server
-    port: 22
-    server: 0.0.0.0
   - name: webserver
     port: 8080
-    use-auth: true
 
 # Available fields:
 # - name: my_service
