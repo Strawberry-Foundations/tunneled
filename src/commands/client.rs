@@ -1,3 +1,4 @@
+#![allow(clippy::too_many_arguments)]
 //! Client implementation for the `bore` service.
 
 use std::sync::Arc;
