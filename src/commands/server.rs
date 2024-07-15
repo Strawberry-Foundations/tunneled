@@ -138,7 +138,7 @@ impl Server {
         if let Some(auth) = &self.auth {
             if let Err(err) = auth.server_handshake(&mut stream).await {
                 LOGGER.warning(format!("Server handshake failed ({err}"));
-                stream.send(ServerMessage::Error(err.to_string())).await?;
+                stream.send(ServerMessage::Error(format!("Handshake failed - {err}"))).await?;
                 return Ok(());
             }
         }
