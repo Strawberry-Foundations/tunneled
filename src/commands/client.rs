@@ -3,7 +3,7 @@
 use std::sync::Arc;
 
 use anyhow::{bail, Context, Result};
-use stblib::colors::{BOLD, C_RESET, RED};
+use stblib::colors::{BOLD, C_RESET, CYAN, RED, RESET};
 use tokio::{io::AsyncWriteExt, net::TcpStream, time::timeout};
 use tracing::{error, info, info_span, warn, Instrument};
 use uuid::Uuid;
@@ -11,7 +11,7 @@ use uuid::Uuid;
 use crate::auth::authenticator::StrawberryIdAuthenticator;
 use crate::auth::secret::Authenticator;
 use crate::shared::{proxy, ClientMessage, Delimited, ServerMessage, NETWORK_TIMEOUT};
-use crate::cli::OPTIONS;
+use crate::commands::compose::Service;
 use crate::statics::{LOGGER, LOGGER_2};
 
 /// State structure for the client.
@@ -22,20 +22,33 @@ pub struct Client {
     /// Destination address of the server.
     to: String,
 
-    // Local host that is forwarded.
+    /// Local host that is forwarded.
     local_host: String,
 
     /// Local port that is forwarded.
     local_port: u16,
+    
+    /// Tcp connection port for remote server
+    control_port: u16,
 
     /// Optional secret used to authenticate clients.
     auth: Option<Authenticator>,
+    
 }
 
 impl Client {
     /// Create a new client.
-    pub async fn new(local_host: &str, local_port: u16, to: &str, port: u16, secret: Option<&str>) -> Result<Self> {
-        let mut stream = Delimited::new(connect_with_timeout(to, OPTIONS.client_options.control_port).await.unwrap_or_else(|err| {
+    pub async fn new(
+        host: &str,
+        port: u16,
+        server: &str,
+        secret: Option<&str>,
+        static_port: Option<u16>,
+        control_port: u16,
+        require_auth: bool,
+        service: Option<&Service>
+    ) -> Result<Self> {
+        let mut stream = Delimited::new(connect_with_timeout(server, control_port).await.unwrap_or_else(|err| {
             eprintln!(" {RED}{BOLD}!{C_RESET}  Server Error: {err}");
             std::process::exit(1)
         }));
@@ -46,7 +59,7 @@ impl Client {
             auth.client_handshake(&mut stream).await.unwrap();
         }
 
-        let id = if OPTIONS.client_options.auth {
+        let id = if require_auth {
             match StrawberryIdAuthenticator::fetch() {
                 Ok(id) => Some(id),
                 Err(_) => None
@@ -56,7 +69,7 @@ impl Client {
             None
         };
 
-        stream.send(ClientMessage::Hello(port, id, OPTIONS.client_options.static_port)).await.unwrap();
+        stream.send(ClientMessage::Hello(0, id, static_port)).await.unwrap();
 
         let remote_port = match stream.recv_timeout().await.unwrap() {
             Some(ServerMessage::Hello(remote_port)) => remote_port,
@@ -66,32 +79,39 @@ impl Client {
             None => bail!("Server Error: unexpected EOF"),
         };
 
-        LOGGER.default(format!("Starting tunneling for {local_host}:{local_port}->{to}"));
+        if let Some(service) = service {
+            LOGGER.default(format!("Starting tunneling service '{CYAN}{}{RESET}'", service.name));
+            LOGGER.info(format!("Forwarding rule: {host}:{port}->{server}"));
+        }
 
-        if OPTIONS.client_options.auth {
+        if service.is_none() {
+            LOGGER.default(format!("Starting tunneling for {host}:{port}->{server}"));
+        }
+
+        if require_auth {
             LOGGER_2.info("Using Strawberry ID Authentication");
         }
 
+        LOGGER.info(format!("Connected to server {server}"));
+        LOGGER.info(format!("Listening at {server}:{remote_port}"));
 
-        LOGGER.info(format!("Connected to server {to}"));
-        LOGGER.info(format!("Listening at {to}:{remote_port}"));
+        if service.is_some() {
+            println!()
+        }
 
         Ok(Client {
             conn: Some(stream),
-            to: to.to_string(),
-            local_host: local_host.to_string(),
-            local_port,
+            to: server.to_string(),
+            local_host: host.to_string(),
+            local_port: port,
+            control_port,
             auth,
         })
     }
 
-    /// Returns the port publicly available on the remote.
-    /* pub fn remote_port(&self) -> u16 {
-        self.remote_port
-    } */
-
     /// Start the client, listening for new connections.
     pub async fn listen(mut self) -> Result<()> {
+        let control_port = self.control_port;
         let mut conn = self.conn.take().unwrap();
         let this = Arc::new(self);
         loop {
@@ -104,12 +124,12 @@ impl Client {
                     tokio::spawn(
                         async move {
                             info!("new connection");
-                            match this.handle_connection(id).await {
+                            match this.handle_connection(id, control_port).await {
                                 Ok(_) => info!("connection exited"),
                                 Err(err) => warn!(%err, "connection exited with error"),
                             }
                         }
-                        .instrument(info_span!("proxy", %id)),
+                            .instrument(info_span!("proxy", %id)),
                     );
                 }
                 Some(ServerMessage::Error(err)) => error!(%err, "server error"),
@@ -118,9 +138,9 @@ impl Client {
         }
     }
 
-    async fn handle_connection(&self, id: Uuid) -> Result<()> {
+    async fn handle_connection(&self, id: Uuid, control_port: u16) -> Result<()> {
         let mut remote_conn =
-            Delimited::new(connect_with_timeout(&self.to[..], OPTIONS.client_options.control_port).await?);
+            Delimited::new(connect_with_timeout(&self.to[..], control_port).await?);
         if let Some(auth) = &self.auth {
             auth.client_handshake(&mut remote_conn).await?;
         }
