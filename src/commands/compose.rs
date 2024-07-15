@@ -1,8 +1,9 @@
 use std::fs::File;
 use std::io::Read;
 use serde::Deserialize;
+use stblib::colors::{BOLD, C_RESET, CYAN, RED, RESET};
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct Service {
     pub name: String,
     pub host: Option<String>,
@@ -13,13 +14,19 @@ pub struct Service {
     pub static_port: Option<u16>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct Services {
     pub services: Vec<Service>,
 }
 
 pub fn read_service_file(file_path: &str) -> Result<Services, Box<dyn std::error::Error>> {
-    let mut file = File::open(file_path)?;
+    let mut file = match File::open(file_path) {
+        Ok(file) => file,
+        Err(_) => {
+            eprintln!("{RED}{BOLD} ! {RESET} File '{CYAN}{file_path}{RESET}' not found{C_RESET}");
+            std::process::exit(1);
+        }
+    };
     let mut contents = String::new();
     file.read_to_string(&mut contents)?;
 
@@ -31,6 +38,10 @@ pub fn read_service_file(file_path: &str) -> Result<Services, Box<dyn std::error
 pub fn compose(path: Option<&str>) -> anyhow::Result<()> {
     let path = path.unwrap_or("services.yml");
     let services = read_service_file(path).unwrap();
+
+    for service in &services.services {
+
+    }
 
     println!("{services:?}");
 
