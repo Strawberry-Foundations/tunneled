@@ -34,9 +34,15 @@ async fn main() -> Result <()> {
     match ARGS.command {
         Command::Local => {
             let client = Client::new(
-                &OPTIONS.client_options.host, OPTIONS.client_options.port,
-                &OPTIONS.client_options.server, 0,
-                OPTIONS.client_options.secret.as_deref()
+                &OPTIONS.client_options.host,
+                OPTIONS.client_options.port,
+                &OPTIONS.client_options.server,
+                OPTIONS.client_options.secret.as_deref(),
+                OPTIONS.client_options.static_port,
+                OPTIONS.client_options.control_port,
+                OPTIONS.client_options.auth,
+                None,
+                
             ).await.unwrap_or_else(|err| {
                 eprintln!("{RED}{BOLD} ! {C_RESET} {err}");
                 std::process::exit(1);
