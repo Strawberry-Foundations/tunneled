@@ -145,7 +145,7 @@ impl Server {
 
         match stream.recv_timeout().await? {
             Some(ClientMessage::Authenticate(_)) => {
-                warn!("unexpected authenticate");
+                LOGGER.warning("Unexpected authenticate");
                 Ok(())
             }
             Some(ClientMessage::Hello(port, id, static_port)) => {
@@ -213,7 +213,7 @@ impl Server {
                             // Remove stale entries to avoid memory leaks.
                             sleep(Duration::from_secs(10)).await;
                             if conns.remove(&id).is_some() {
-                                warn!(%id, "Removed stale connection");
+                                LOGGER.warning(format!("Removed stale connection ({id})"));
                             }
                         });
                         stream.send(ServerMessage::Connection(id)).await?;
@@ -229,7 +229,7 @@ impl Server {
                         stream2.write_all(&parts.read_buf).await?;
                         proxy(parts.io, stream2).await?
                     }
-                    None => warn!(%id, "Missing connection"),
+                    None => LOGGER.warning(format!("Missing connection ({id})")),
                 }
                 Ok(())
             }
