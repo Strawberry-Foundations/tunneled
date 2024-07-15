@@ -11,20 +11,24 @@ use stblib::colors::{BOLD, C_RESET, CYAN, RED, RESET};
 
 use crate::auth::authenticator::StrawberryIdAuthenticator;
 use crate::auth::secret::Authenticator;
+use crate::commands::client::connect_with_timeout;
 use crate::shared::{proxy, ClientMessage, Delimited, ServerMessage, NETWORK_TIMEOUT};
-use crate::cli::OPTIONS;
 use crate::statics::{LOGGER, LOGGER_2};
 
 
 #[derive(Debug, Deserialize, Clone)]
 pub struct Service {
     pub name: String,
+    pub port: u16,
     pub host: Option<String>,
     pub server: Option<String>,
     pub secret: Option<String>,
-    pub port: u16,
     #[serde(rename = "static-port")]
     pub static_port: Option<u16>,
+    #[serde(rename = "control-port")]
+    pub control_port: Option<u16>,
+    #[serde(rename = "use-auth")]
+    pub use_auth: Option<bool>,
 }
 
 #[derive(Debug, Deserialize, Clone)]
@@ -60,7 +64,10 @@ pub async fn compose(path: Option<&str>) -> Result<()> {
                 &service.host.unwrap_or(String::from("localhost")),
                 service.port,
                 &service.server.unwrap_or(String::from("strawberryfoundations.org")),
-                service.secret.as_deref()
+                service.secret.as_deref(),
+                service.static_port,
+                service.control_port.unwrap_or(7835),
+                service.use_auth.unwrap_or(false),
             ).await.unwrap_or_else(|err| {
                 eprintln!("{RED}{BOLD} ! {C_RESET} {err}");
                 std::process::exit(1);
@@ -72,7 +79,7 @@ pub async fn compose(path: Option<&str>) -> Result<()> {
         });
         handles.push(handle);
     }
-    
+
     for handle in handles {
         let _ = handle.await;
     }
@@ -95,6 +102,9 @@ pub struct Client {
     /// Local port that is forwarded.
     local_port: u16,
 
+    /// Connection port for remote server
+    control_port: u16,
+
     /// Optional secret used to authenticate clients.
     auth: Option<Authenticator>,
 }
@@ -105,9 +115,13 @@ impl Client {
         host: &str,
         port: u16,
         server: &str,
-        secret: Option<&str>
+        secret: Option<&str>,
+        static_port: Option<u16>,
+        control_port: u16,
+        require_auth: bool
+
     ) -> Result<Self> {
-        let mut stream = Delimited::new(connect_with_timeout(server, OPTIONS.client_options.control_port).await.unwrap_or_else(|err| {
+        let mut stream = Delimited::new(connect_with_timeout(server, control_port).await.unwrap_or_else(|err| {
             eprintln!(" {RED}{BOLD}!{C_RESET}  Server Error: {err}");
             std::process::exit(1)
         }));
@@ -118,7 +132,7 @@ impl Client {
             auth.client_handshake(&mut stream).await.unwrap();
         }
 
-        let id = if OPTIONS.client_options.auth {
+        let id = if require_auth {
             match StrawberryIdAuthenticator::fetch() {
                 Ok(id) => Some(id),
                 Err(_) => None
@@ -128,7 +142,7 @@ impl Client {
             None
         };
 
-        stream.send(ClientMessage::Hello(0, id, OPTIONS.client_options.static_port)).await.unwrap();
+        stream.send(ClientMessage::Hello(0, id, static_port)).await.unwrap();
 
         let remote_port = match stream.recv_timeout().await.unwrap() {
             Some(ServerMessage::Hello(remote_port)) => remote_port,
@@ -140,7 +154,7 @@ impl Client {
 
         LOGGER.default(format!("Starting tunneling for {host}:{port}->{server}"));
 
-        if OPTIONS.client_options.auth {
+        if require_auth {
             LOGGER_2.info("Using Strawberry ID Authentication");
         }
 
@@ -153,17 +167,14 @@ impl Client {
             to: server.to_string(),
             local_host: host.to_string(),
             local_port: port,
+            control_port,
             auth,
         })
     }
 
-    /// Returns the port publicly available on the remote.
-    /* pub fn remote_port(&self) -> u16 {
-        self.remote_port
-    } */
-
     /// Start the client, listening for new connections.
     pub async fn listen(mut self) -> Result<()> {
+        let control_port = self.control_port;
         let mut conn = self.conn.take().unwrap();
         let this = Arc::new(self);
         loop {
@@ -176,7 +187,7 @@ impl Client {
                     tokio::spawn(
                         async move {
                             info!("new connection");
-                            match this.handle_connection(id).await {
+                            match this.handle_connection(id, control_port).await {
                                 Ok(_) => info!("connection exited"),
                                 Err(err) => warn!(%err, "connection exited with error"),
                             }
@@ -190,9 +201,9 @@ impl Client {
         }
     }
 
-    async fn handle_connection(&self, id: Uuid) -> Result<()> {
+    async fn handle_connection(&self, id: Uuid, control_port: u16) -> Result<()> {
         let mut remote_conn =
-            Delimited::new(connect_with_timeout(&self.to[..], OPTIONS.client_options.control_port).await?);
+            Delimited::new(connect_with_timeout(&self.to[..], control_port).await?);
         if let Some(auth) = &self.auth {
             auth.client_handshake(&mut remote_conn).await?;
         }
@@ -206,10 +217,3 @@ impl Client {
     }
 }
 
-async fn connect_with_timeout(to: &str, port: u16) -> Result<TcpStream> {
-    match timeout(NETWORK_TIMEOUT, TcpStream::connect((to, port))).await {
-        Ok(res) => res,
-        Err(err) => Err(err.into()),
-    }
-        .with_context(|| format!("could not connect to {to}:{port}"))
-}
