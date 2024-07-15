@@ -4,6 +4,7 @@ use stblib::colors::{BOLD, C_RESET, RED, RESET};
 pub enum Command {
     Local,
     Server,
+    Compose,
     Auth,
     About,
     None
@@ -26,7 +27,8 @@ pub struct ClientOptions {
     pub secret: Option<String>,
     pub auth: bool,
     pub control_port: u16,
-    pub static_port: Option<u16>
+    pub static_port: Option<u16>,
+    pub compose_file: Option<String>
 }
 
 
@@ -68,6 +70,7 @@ impl Args {
             "server" => args.command = Command::Server,
             "auth" => args.command = Command::Auth,
             "about" => args.command = Command::About,
+            "compose" => args.command = Command::Compose,
             _ => args.command = Command::None,
         }
 
@@ -90,7 +93,8 @@ impl Args {
                 secret: Some(String::new()),
                 auth: false,
                 control_port: 7835,
-                static_port: None
+                static_port: None,
+                compose_file: None,
             }
         };
 
@@ -164,6 +168,18 @@ impl Args {
                         }
                     } else {
                         eprintln!("{RED}{BOLD} ! {RESET} Missing address{C_RESET}");
+                    }
+                },
+
+                "-f" | "--file" => {
+                    if let Some(val) = iter.next() {
+                        if let Ok(compose_file) = val.parse::<String>() {
+                            options.client_options.compose_file = Option::from(compose_file);
+                        } else {
+                            eprintln!("{RED}{BOLD} ! {RESET} Invalid compose file{C_RESET}");
+                        }
+                    } else {
+                        eprintln!("{RED}{BOLD} ! {RESET} Missing compose file{C_RESET}");
                     }
                 },
 
