@@ -2,8 +2,8 @@ use std::sync::Arc;
 use std::fs::File;
 use std::io::Read;
 
-use anyhow::{bail, Context, Result};
-use tokio::{io::AsyncWriteExt, net::TcpStream, time::timeout};
+use anyhow::{bail, Result};
+use tokio::{io::AsyncWriteExt, net::TcpStream};
 use tracing::{error, info, info_span, warn, Instrument};
 use uuid::Uuid;
 use serde::Deserialize;
@@ -12,7 +12,7 @@ use stblib::colors::{BOLD, C_RESET, CYAN, RED, RESET};
 use crate::auth::authenticator::StrawberryIdAuthenticator;
 use crate::auth::secret::Authenticator;
 use crate::commands::client::connect_with_timeout;
-use crate::shared::{proxy, ClientMessage, Delimited, ServerMessage, NETWORK_TIMEOUT};
+use crate::shared::{proxy, ClientMessage, Delimited, ServerMessage};
 use crate::statics::{LOGGER, LOGGER_2};
 
 
