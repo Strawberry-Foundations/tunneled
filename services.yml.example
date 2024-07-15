@@ -1,0 +1,17 @@
+services:
+  - name: ssh-server
+    port: 22
+    server: 0.0.0.0
+  - name: webserver
+    port: 8080
+    use-auth: true
+
+# Available fields:
+# - name: my_service
+#   port: 1234
+#   host: 192.168.0.157
+#   server: strawberryfoundations.org
+#   secret: somesecret
+#   static-port: 5678
+#   control-port: 7835
+#   use-auth: true
