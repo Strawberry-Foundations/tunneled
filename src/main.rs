@@ -47,7 +47,7 @@ async fn main() -> Result <()> {
             });
         }
         Command::Compose => {
-            compose(OPTIONS.client_options.compose_file.as_deref()).unwrap_or_else(|err| {
+            compose(OPTIONS.client_options.compose_file.as_deref()).await.unwrap_or_else(|err| {
                 eprintln!("{RED}{BOLD} ! {C_RESET} {err}");
                 std::process::exit(1);
             })
