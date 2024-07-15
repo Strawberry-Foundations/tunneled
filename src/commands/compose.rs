@@ -1,3 +1,4 @@
+#![allow(clippy::too_many_arguments)]
 use std::sync::Arc;
 use std::fs::File;
 use std::io::Read;
@@ -61,6 +62,8 @@ pub async fn compose(path: Option<&str>) -> Result<()> {
         let secret = Option::from(service.secret.clone().unwrap_or(String::new()));
 
         let handle = tokio::spawn(async move {
+            let service_clone = service.clone();
+
             let client = Client::new(
                 &service.host.unwrap_or(String::from("localhost")),
                 service.port,
@@ -69,6 +72,7 @@ pub async fn compose(path: Option<&str>) -> Result<()> {
                 service.static_port,
                 service.control_port.unwrap_or(7835),
                 service.use_auth.unwrap_or(false),
+                Option::from(&service_clone),
             ).await.unwrap_or_else(|err| {
                 eprintln!("{RED}{BOLD} ! {C_RESET} {err}");
                 std::process::exit(1);
@@ -119,8 +123,8 @@ impl Client {
         secret: Option<&str>,
         static_port: Option<u16>,
         control_port: u16,
-        require_auth: bool
-
+        require_auth: bool,
+        service: Option<&Service>
     ) -> Result<Self> {
         let mut stream = Delimited::new(connect_with_timeout(server, control_port).await.unwrap_or_else(|err| {
             eprintln!(" {RED}{BOLD}!{C_RESET}  Server Error: {err}");
@@ -153,15 +157,25 @@ impl Client {
             None => bail!("Server Error: unexpected EOF"),
         };
 
-        LOGGER.default(format!("Starting tunneling for {host}:{port}->{server}"));
+        if let Some(service) = service {
+            LOGGER.default(format!("Starting tunneling service '{CYAN}{}{RESET}'", service.name));
+            LOGGER.info(format!("Forwarding rule: {host}:{port}->{server}"));
+        }
+
+        if service.is_none() {
+            LOGGER.default(format!("Starting tunneling for {host}:{port}->{server}"));
+        }
 
         if require_auth {
             LOGGER_2.info("Using Strawberry ID Authentication");
         }
 
-
         LOGGER.info(format!("Connected to server {server}"));
         LOGGER.info(format!("Listening at {server}:{remote_port}"));
+
+        if service.is_some() {
+            println!()
+        }
 
         Ok(Client {
             conn: Some(stream),
