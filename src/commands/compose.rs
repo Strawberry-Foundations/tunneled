@@ -25,8 +25,11 @@ pub fn read_service_file(file_path: &str) -> Result<Services, Box<dyn std::error
 }
 
 
-pub fn compose() -> anyhow::Result<()> {
-    let services = read_service_file("services.yml").unwrap();
+pub fn compose(path: Option<&str>) -> anyhow::Result<()> {
+    let path = path.unwrap_or("services.yml");
+    let services = read_service_file(path).unwrap();
+    
+    println!("{services:?}");
 
     Ok(())
 }
