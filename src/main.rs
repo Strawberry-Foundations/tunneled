@@ -21,6 +21,7 @@ use crate::commands::auth::auth;
 
 use crate::cli::{ARGS, OPTIONS};
 use crate::cli::args::Command;
+use crate::commands::compose::compose;
 
 pub mod cli;
 pub mod commands;
@@ -44,7 +45,13 @@ async fn main() -> Result <()> {
             client.listen().await.unwrap_or_else(|err| {
                 eprintln!("{RED}{BOLD} ! {C_RESET} {err}")
             });
-        },
+        }
+        Command::Compose => {
+            compose().unwrap_or_else(|err| {
+                eprintln!("{RED}{BOLD} ! {C_RESET} {err}");
+                std::process::exit(1);
+            })
+        }
         Command::Server => {
             let port_range = OPTIONS.server_options.min_port..=OPTIONS.server_options.max_port;
             if port_range.is_empty() {
