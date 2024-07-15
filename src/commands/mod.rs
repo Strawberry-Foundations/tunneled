@@ -3,3 +3,4 @@ pub mod auth;
 pub mod client;
 pub mod server;
 pub mod about;
+pub mod compose;
