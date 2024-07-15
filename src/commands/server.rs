@@ -9,7 +9,7 @@ use stblib::colors::{BOLD, C_RESET, MAGENTA, RESET, YELLOW};
 use tokio::io::AsyncWriteExt;
 use tokio::net::{TcpListener, TcpStream};
 use tokio::time::{sleep, timeout};
-use tracing::{info, info_span, warn, Instrument};
+use tracing::{info, info_span, Instrument};
 use uuid::Uuid;
 
 use crate::auth::authenticator::{ClientAuthentication};
