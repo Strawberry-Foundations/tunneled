@@ -81,8 +81,8 @@ impl Args {
         let mut options = Options {
             server_options: ServerOptions {
                 min_port: 1024,
-                max_port: 65535,
-                secret: Some(String::new()),
+                max_port: 65535, 
+                secret: None,
                 require_id: false,
                 control_port: 7835,
             },
@@ -90,7 +90,7 @@ impl Args {
                 host: String::from("localhost"),
                 port: 8080,
                 server: String::from("strawberryfoundations.org"),
-                secret: Some(String::new()),
+                secret: None,
                 auth: false,
                 control_port: 7835,
                 static_port: None,
