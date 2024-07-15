@@ -57,14 +57,15 @@ pub async fn compose(path: Option<&str>) -> Result<()> {
     let services = read_service_file(path).unwrap();
     let mut handles = vec![];
 
-
     for service in services.services.clone() {
+        let secret = Option::from(service.secret.clone().unwrap_or(String::new()));
+
         let handle = tokio::spawn(async move {
             let client = Client::new(
                 &service.host.unwrap_or(String::from("localhost")),
                 service.port,
                 &service.server.unwrap_or(String::from("strawberryfoundations.org")),
-                service.secret.as_deref(),
+                secret.as_deref(),
                 service.static_port,
                 service.control_port.unwrap_or(7835),
                 service.use_auth.unwrap_or(false),
