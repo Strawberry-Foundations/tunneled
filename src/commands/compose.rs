@@ -1,4 +1,3 @@
-#![allow(clippy::too_many_arguments)]
 use std::fs::File;
 use std::io::Read;
 use anyhow::Result;
@@ -50,8 +49,6 @@ pub async fn compose(path: Option<&str>) -> Result<()> {
     let mut handles = vec![];
 
     for service in services.services.clone() {
-        let secret = Option::from(service.secret.clone().unwrap_or(String::new()));
-
         let handle = tokio::spawn(async move {
             let service_clone = service.clone();
 
@@ -59,7 +56,7 @@ pub async fn compose(path: Option<&str>) -> Result<()> {
                 &service.host.unwrap_or(String::from("localhost")),
                 service.port,
                 &service.server.unwrap_or(String::from("strawberryfoundations.org")),
-                secret.as_deref(),
+                service.secret.as_deref(),
                 service.static_port,
                 service.control_port.unwrap_or(7835),
                 service.use_auth.unwrap_or(false),
