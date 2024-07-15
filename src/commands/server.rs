@@ -137,7 +137,7 @@ impl Server {
         let mut stream = Delimited::new(stream);
         if let Some(auth) = &self.auth {
             if let Err(err) = auth.server_handshake(&mut stream).await {
-                LOGGER.warning(format!("Server handshake failed ({err}"));
+                LOGGER.warning("Server handshake failed".to_string());
                 stream.send(ServerMessage::Error(format!("Handshake failed - {err}"))).await?;
                 return Ok(());
             }
