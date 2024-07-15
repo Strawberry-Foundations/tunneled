@@ -134,7 +134,7 @@ impl Client {
     }
 }
 
-async fn connect_with_timeout(to: &str, port: u16) -> Result<TcpStream> {
+pub async fn connect_with_timeout(to: &str, port: u16) -> Result<TcpStream> {
     match timeout(NETWORK_TIMEOUT, TcpStream::connect((to, port))).await {
         Ok(res) => res,
         Err(err) => Err(err.into()),
