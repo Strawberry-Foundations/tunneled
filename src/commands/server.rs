@@ -74,7 +74,11 @@ impl Server {
 
     #[allow(unused_assignments)]
     async fn create_listener(&self, port: u16, static_port: Option<u16>, id: &Option<ClientAuthentication>) -> Result<TcpListener, &'static str> {
-        let whitelist = ["julian@strawberryfoundations.xyz"];
+        let whitelist = [
+            "julian@strawberryfoundations.org",
+            "matteo@strawberryfoundations.org",
+            "info@strawberryfoundations.org",
+        ];
 
         let try_bind = |port: u16| async move {
             TcpListener::bind(("0.0.0.0", port))
