@@ -22,6 +22,7 @@ pub struct StrawberryIdAuthenticator {
 
 impl StrawberryIdAuthenticator {
     pub fn fetch() -> Result<StrawberryIdAuthenticator, Box<dyn std::error::Error>> {
+        // todo: change to XDG User Directories
         if let Some(home_dir) = dirs::home_dir() {
             let config_dir = home_dir.join(".config").join("tunneled");
             let credentials_path = config_dir.join("credentials.yml");
