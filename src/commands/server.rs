@@ -34,7 +34,10 @@ pub struct Server {
     control_port: u16,
 
     /// Require Strawberry ID?
-    require_id: bool
+    require_id: bool,
+
+    /// Whitelist for static port users
+    whitelist_static_port: Vec<String>
 }
 
 #[derive(Debug, Deserialize, Clone)]
@@ -48,6 +51,8 @@ pub struct ServerConfig {
     pub secret: Option<String>,
     #[serde(rename = "require-id")]
     pub require_id: Option<bool>,
+    #[serde(rename = "whitelist-static-port")]
+    pub whitelist_static_port: Option<Vec<String>>,
 }
 
 pub fn read_config_file(file_path: &str) -> Result<ServerConfig, Box<dyn std::error::Error>> {
@@ -67,14 +72,15 @@ pub fn read_config_file(file_path: &str) -> Result<ServerConfig, Box<dyn std::er
 
 impl Server {
     /// Create a new server with a specified minimum port number.
-    pub fn new(port_range: RangeInclusive<u16>, secret: Option<&str>, control_port: u16, require_id: bool) -> Self {
+    pub fn new(port_range: RangeInclusive<u16>, secret: Option<&str>, control_port: u16, require_id: bool, whitelist: Vec<String>) -> Self {
         assert!(!port_range.is_empty(), "must provide at least one port");
         Server {
             port_range,
             conns: Arc::new(DashMap::new()),
             auth: secret.map(Authenticator::new),
             control_port,
-            require_id
+            require_id,
+            whitelist_static_port: whitelist
         }
     }
 
@@ -111,12 +117,6 @@ impl Server {
 
     #[allow(unused_assignments)]
     async fn create_listener(&self, port: u16, static_port: Option<u16>, id: &Option<ClientAuthentication>) -> Result<TcpListener, &'static str> {
-        let whitelist = [
-            "julian@strawberryfoundations.org",
-            "matteo@strawberryfoundations.org",
-            "info@strawberryfoundations.org",
-        ];
-
         let try_bind = |port: u16| async move {
             TcpListener::bind(("0.0.0.0", port))
                 .await
@@ -129,12 +129,12 @@ impl Server {
 
         if let Some(static_port) = static_port {
             if let Some(id) = id {
-                if whitelist.contains(&&*id.strawberry_id.email) {
+                if self.whitelist_static_port.contains(&id.strawberry_id.email.to_string()) {
                     match try_bind(static_port).await {
                         Ok(listener) => Ok(listener),
                         Err(err) => {
                             LOGGER.error(format!("Failed to bind to port: {err}"));
-                            
+
                             Err("Port is not available")
                         },
                     }
