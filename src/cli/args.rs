@@ -17,6 +17,7 @@ pub struct ServerOptions {
     pub secret: Option<String>,
     pub require_id: bool,
     pub control_port: u16,
+    pub config_file: Option<String>
 }
 
 #[derive(Default)]
