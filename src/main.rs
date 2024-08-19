@@ -74,7 +74,7 @@ async fn main() -> Result <()> {
                     config.server.secret.as_deref(),
                     config.server.control_port.unwrap_or(7835),
                     config.server.require_id.unwrap_or(false),
-                    config.server.whitelist_static_port.unwrap_or(Vec::new())
+                    config.server.whitelist_static_port.unwrap_or_default()
                 ).listen().await?;
             }
             else {
