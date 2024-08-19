@@ -27,10 +27,11 @@ pub fn help() {
             {CYAN}{BOLD}-cp, --control-port{C_RESET}     Control port for proxy server             {GREEN}{BOLD}[default: 7835]{C_RESET}
             {CYAN}{BOLD}--min-port <port>{C_RESET}       Minimum Port for the remote proxy server  {GREEN}{BOLD}[default: 1024]{C_RESET}
             {CYAN}{BOLD}--max-port <port>{C_RESET}       Maximum Port for the remote proxy server  {GREEN}{BOLD}[default: 65535]{C_RESET}
+            {CYAN}{BOLD}-f, --file <file>{C_RESET}       Configuration file for server config      {GREEN}{BOLD}[optional]{C_RESET}
 
     {CYAN}{BOLD}compose:{C_RESET} Starts one or more local proxies for the remote server using a configuration file
      {BOLD}↳ {MAGENTA}Options:{C_RESET}
-            {CYAN}{BOLD}-f, --file <secret>{C_RESET}     Configuration file for proxy services   {GREEN}{BOLD}[default: service.yml]{C_RESET}
+            {CYAN}{BOLD}-f, --file <file>{C_RESET}     Configuration file for proxy services   {GREEN}{BOLD}[default: service.yml]{C_RESET}
 
 ", *VERSION);
     std::process::exit(0);
