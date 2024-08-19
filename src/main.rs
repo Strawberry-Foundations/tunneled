@@ -16,7 +16,7 @@ use stblib::colors::{BOLD, C_RESET, RED, RESET};
 use crate::auth::Auth;
 
 use crate::commands::client::Client;
-use crate::commands::server::Server;
+use crate::commands::server::{read_config_file, Server};
 use crate::commands::compose::compose;
 use crate::commands::auth::auth;
 
@@ -59,11 +59,36 @@ async fn main() -> Result <()> {
             })
         }
         Command::Server => {
-            let port_range = OPTIONS.server_options.min_port..=OPTIONS.server_options.max_port;
-            if port_range.is_empty() {
-                eprintln!("{RED}{BOLD} ! {RESET} Port range is empty{C_RESET}");
+            if let Some(config_file) = OPTIONS.server_options.config_file.as_deref() {
+                let config = read_config_file(config_file).unwrap_or_else(|err| {
+                    eprintln!("{RED}{BOLD} ! {C_RESET} {err}");
+                    std::process::exit(1);
+                });
+
+                let port_range = config.min_port..=config.max_port;
+                if port_range.is_empty() {
+                    eprintln!("{RED}{BOLD} ! {RESET} Port range is empty{C_RESET}");
+                }
+                Server::new(
+                    port_range,
+                    config.secret.as_deref(),
+                    config.control_port.unwrap_or(7835),
+                    config.require_id.unwrap_or(false)
+                ).listen().await?;
             }
-            Server::new(port_range, OPTIONS.server_options.secret.as_deref()).listen().await?;
+            else {
+                let port_range = OPTIONS.server_options.min_port..=OPTIONS.server_options.max_port;
+                if port_range.is_empty() {
+                    eprintln!("{RED}{BOLD} ! {RESET} Port range is empty{C_RESET}");
+                }
+                Server::new(
+                    port_range,
+                    OPTIONS.server_options.secret.as_deref(),
+                    OPTIONS.server_options.control_port,
+                    OPTIONS.server_options.require_id,
+                ).listen().await?;
+            }
+
         }
         Command::Auth => {
             auth(Auth::strawberry_id()).await?;
