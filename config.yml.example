@@ -1,0 +1,5 @@
+server:
+  min-port: 49100
+  max-port: 50000
+  require-id: false
+  secret: mysecret
