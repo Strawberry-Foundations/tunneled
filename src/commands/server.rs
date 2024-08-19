@@ -41,7 +41,7 @@ pub struct Server {
 }
 
 #[derive(Debug, Deserialize, Clone)]
-pub struct ServerConfig {
+pub struct Config {
     #[serde(rename = "min-port")]
     pub min_port: u16,
     #[serde(rename = "max-port")]
@@ -53,6 +53,11 @@ pub struct ServerConfig {
     pub require_id: Option<bool>,
     #[serde(rename = "whitelist-static-port")]
     pub whitelist_static_port: Option<Vec<String>>,
+}
+
+#[derive(Debug, Deserialize, Clone)]
+pub struct ServerConfig {
+    pub server: Config
 }
 
 pub fn read_config_file(file_path: &str) -> Result<ServerConfig, Box<dyn std::error::Error>> {
