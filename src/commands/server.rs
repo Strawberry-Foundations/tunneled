@@ -2,10 +2,12 @@
 //! Server implementation for the `bore` service.
 
 use std::{io, net::SocketAddr, ops::RangeInclusive, sync::Arc, time::Duration};
-
+use std::fs::File;
+use std::io::Read;
 use anyhow::Result;
 use dashmap::DashMap;
-use stblib::colors::{BOLD, C_RESET, MAGENTA, RESET, YELLOW};
+use serde::Deserialize;
+use stblib::colors::{BOLD, C_RESET, CYAN, MAGENTA, RED, RESET, YELLOW};
 use tokio::io::AsyncWriteExt;
 use tokio::net::{TcpListener, TcpStream};
 use tokio::time::{sleep, timeout};
@@ -14,7 +16,6 @@ use uuid::Uuid;
 
 use crate::auth::authenticator::{ClientAuthentication};
 use crate::auth::secret::Authenticator;
-use crate::cli::OPTIONS;
 use crate::shared::{proxy, ClientMessage, Delimited, ServerMessage};
 use crate::statics::{LOGGER, LOGGER_2, STRAWBERRY_ID_API, VERSION};
 
@@ -28,29 +29,65 @@ pub struct Server {
 
     /// Concurrent map of IDs to incoming connections.
     conns: Arc<DashMap<Uuid, TcpStream>>,
+
+    /// Access port for tunneled
+    control_port: u16,
+
+    /// Require Strawberry ID?
+    require_id: bool
+}
+
+#[derive(Debug, Deserialize, Clone)]
+pub struct ServerConfig {
+    #[serde(rename = "min-port")]
+    pub min_port: u16,
+    #[serde(rename = "max-port")]
+    pub max_port: u16,
+    #[serde(rename = "control-port")]
+    pub control_port: Option<u16>,
+    pub secret: Option<String>,
+    #[serde(rename = "require-id")]
+    pub require_id: Option<bool>,
+}
+
+pub fn read_config_file(file_path: &str) -> Result<ServerConfig, Box<dyn std::error::Error>> {
+    let mut file = match File::open(file_path) {
+        Ok(file) => file,
+        Err(_) => {
+            eprintln!("{RED}{BOLD} ! {RESET} File '{CYAN}{file_path}{RESET}' not found{C_RESET}");
+            std::process::exit(1);
+        }
+    };
+    let mut contents = String::new();
+    file.read_to_string(&mut contents)?;
+
+    let services: ServerConfig = serde_yaml::from_str(&contents)?;
+    Ok(services)
 }
 
 impl Server {
     /// Create a new server with a specified minimum port number.
-    pub fn new(port_range: RangeInclusive<u16>, secret: Option<&str>) -> Self {
+    pub fn new(port_range: RangeInclusive<u16>, secret: Option<&str>, control_port: u16, require_id: bool) -> Self {
         assert!(!port_range.is_empty(), "must provide at least one port");
         Server {
             port_range,
             conns: Arc::new(DashMap::new()),
             auth: secret.map(Authenticator::new),
+            control_port,
+            require_id
         }
     }
 
     /// Start the server, listening for new connections.
     pub async fn listen(self) -> Result<()> {
         let this = Arc::new(self);
-        let addr = SocketAddr::from(([0, 0, 0, 0], OPTIONS.server_options.control_port));
+        let addr = SocketAddr::from(([0, 0, 0, 0], this.control_port));
         let listener = TcpListener::bind(&addr).await?;
 
         LOGGER_2.default(format!("Starting Tunneled server v{}", *VERSION));
         LOGGER.info(format!("Server is listening on {addr}"));
 
-        if OPTIONS.server_options.require_id {
+        if this.require_id {
             LOGGER_2.info(format!("Using Strawberry ID Authentication ({STRAWBERRY_ID_API})"));
         }
 
@@ -153,7 +190,7 @@ impl Server {
                 Ok(())
             }
             Some(ClientMessage::Hello(port, id, static_port)) => {
-                let strawberry_id = if OPTIONS.server_options.require_id {
+                let strawberry_id = if self.require_id {
                     if let Some(mut id) = id.clone() {
                         let (username, token) = id.clone().unwrap();
 
