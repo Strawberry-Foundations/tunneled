@@ -19,3 +19,4 @@ Cargo.lock
 /target
 
 services.yml
+config.yml
