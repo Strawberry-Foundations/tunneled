@@ -86,6 +86,7 @@ impl Args {
                 secret: None,
                 require_id: false,
                 control_port: 7835,
+                config_file: None,
             },
             client_options: ClientOptions {
                 host: String::from("localhost"),
