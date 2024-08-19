@@ -17,11 +17,11 @@ use crate::auth::Auth;
 
 use crate::commands::client::Client;
 use crate::commands::server::Server;
+use crate::commands::compose::compose;
 use crate::commands::auth::auth;
 
 use crate::cli::{ARGS, OPTIONS};
 use crate::cli::args::Command;
-use crate::commands::compose::compose;
 
 pub mod cli;
 pub mod commands;
