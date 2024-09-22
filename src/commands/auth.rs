@@ -1,7 +1,7 @@
 use std::fs;
 use serde::{Deserialize, Serialize};
 
-use stblib::colors::{BLUE, BOLD, C_RESET, GREEN, RED, RESET, YELLOW};
+use stblib::colors::{BLUE, BOLD, CYAN, C_RESET, GREEN, RED, RESET, YELLOW};
 
 use crate::auth::strawberry_id::StrawberryId;
 use crate::statics::STRAWBERRY_ID_API;
@@ -13,7 +13,7 @@ struct Credentials {
 }
 
 pub async fn auth(mut auth: StrawberryId) -> anyhow::Result<()> {
-    println!("{BOLD}{GREEN}--- Strawberry ID Login ---{C_RESET}");
+    println!("--- {CYAN}{BOLD}Strawberry ID Login{C_RESET} ---");
 
     let request = reqwest::get(format!("{STRAWBERRY_ID_API}api/request")).await?;
     let code = if request.status().is_success() {
@@ -29,8 +29,10 @@ pub async fn auth(mut auth: StrawberryId) -> anyhow::Result<()> {
         std::process::exit(1);
     };
 
-    // println!("Go to {BOLD}{BLUE}{STRAWBERRY_ID_API}de/login?oauth=true&service=tunneled{C_RESET} and enter the following code: {BOLD}{CYAN}{code}{C_RESET}");
-    println!("Go to {BOLD}{BLUE}{STRAWBERRY_ID_API}de/login/oauth_dialog/tunneled?code={code}{C_RESET}");
+    println!(
+        "To continue with the registration, open the following page and authorise access to your Strawberry ID:\n\
+        {BOLD}{BLUE}{STRAWBERRY_ID_API}de/login/oauth_dialog/tunneled?code={code}{C_RESET}"
+    );
 
     let credentials = auth.login(code).await?;
 
