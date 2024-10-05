@@ -16,11 +16,11 @@ readme = "README.md"
 anyhow = { version = "1.0.89", features = ["backtrace"] }
 lazy_static = "1.5.0"
 stblib = "0.6.3-pre1"
-clap = { version = "4.5.18", features = ["derive", "env"] }
-reqwest = "0.12.7"
+clap = { version = "4.5.19", features = ["derive", "env"] }
+reqwest = "0.12.8"
 dashmap = "6.1.0"
 fastrand = "2.1.1"
-futures-util = { version = "0.3.30", features = ["sink"] }
+futures-util = { version = "0.3.31", features = ["sink"] }
 hex = "0.4.3"
 hmac = "0.13.0-pre.4"
 serde = { version = "1.0.210", features = ["derive"] }
