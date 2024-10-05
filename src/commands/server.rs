@@ -254,13 +254,13 @@ impl Server {
                         LOGGER.info(format!("New connection at {addr}:{port}"));
 
                         let id = Uuid::new_v4();
-                        let conns = Arc::clone(&self.connections);
+                        let connections = Arc::clone(&self.connections);
 
-                        conns.insert(id, stream2);
+                        connections.insert(id, stream2);
                         tokio::spawn(async move {
                             // Remove stale entries to avoid memory leaks.
                             sleep(Duration::from_secs(10)).await;
-                            if conns.remove(&id).is_some() {
+                            if connections.remove(&id).is_some() {
                                 LOGGER.warning(format!("Removed stale connection ({id})"));
                             }
                         });
