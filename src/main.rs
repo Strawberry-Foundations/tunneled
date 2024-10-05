@@ -13,13 +13,13 @@
 //! members and can be run programmatically with a Tokio 1.0 runtime.
 use anyhow::Result;
 use stblib::colors::{BOLD, C_RESET, RED, RESET};
-use crate::auth::Auth;
 
 use crate::commands::client::Client;
 use crate::commands::server::{read_config_file, Server};
 use crate::commands::compose::compose;
 use crate::commands::auth::auth;
 
+use crate::auth::Auth;
 use crate::cli::{ARGS, OPTIONS};
 use crate::cli::args::Command;
 
@@ -41,28 +41,28 @@ async fn main() -> Result <()> {
                 OPTIONS.client_options.static_port,
                 OPTIONS.client_options.control_port,
                 OPTIONS.client_options.auth,
-                None,
-                
+                None
             ).await.unwrap_or_else(|err| {
                 eprintln!("{RED}{BOLD} ! {C_RESET} {err}");
-                std::process::exit(1);
+                std::process::exit(1)
             });
 
             client.listen().await.unwrap_or_else(|err| {
-                eprintln!("{RED}{BOLD} ! {C_RESET} {err}")
+                eprintln!("{RED}{BOLD} ! {C_RESET} {err}");
+                std::process::exit(1)
             });
         }
         Command::Compose => {
             compose(OPTIONS.client_options.compose_file.as_deref()).await.unwrap_or_else(|err| {
                 eprintln!("{RED}{BOLD} ! {C_RESET} {err}");
-                std::process::exit(1);
+                std::process::exit(1)
             })
         }
         Command::Server => {
             if let Some(config_file) = OPTIONS.server_options.config_file.as_deref() {
                 let config = read_config_file(config_file).unwrap_or_else(|err| {
                     eprintln!("{RED}{BOLD} ! {C_RESET} {err}");
-                    std::process::exit(1);
+                    std::process::exit(1)
                 });
 
                 let port_range = config.server.min_port..=config.server.max_port;
@@ -82,6 +82,7 @@ async fn main() -> Result <()> {
                 if port_range.is_empty() {
                     eprintln!("{RED}{BOLD} ! {RESET} Port range is empty{C_RESET}");
                 }
+                
                 Server::new(
                     port_range,
                     OPTIONS.server_options.secret.as_deref(),
