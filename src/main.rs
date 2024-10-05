@@ -19,6 +19,7 @@ use crate::commands::client::Client;
 use crate::commands::server::{read_config_file, Server};
 use crate::commands::compose::compose;
 use crate::commands::auth::auth;
+use crate::commands::serial::serial_session;
 
 use crate::cli::{ARGS, OPTIONS};
 use crate::cli::args::Command;
@@ -94,6 +95,9 @@ async fn main() -> Result <()> {
         }
         Command::Auth => {
             auth(Auth::strawberry_id()).await?;
+        }
+        Command::Serial => {
+            let _serial = serial_session("/dev/ttys001", 9600);
         }
         Command::About => commands::about::about(),
         Command::None => commands::help::help(),

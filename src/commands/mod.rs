@@ -4,3 +4,4 @@ pub mod client;
 pub mod server;
 pub mod about;
 pub mod compose;
+pub mod serial;
