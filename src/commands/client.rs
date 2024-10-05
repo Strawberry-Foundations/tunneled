@@ -18,7 +18,7 @@ use crate::statics::{LOGGER, LOGGER_2};
 /// State structure for the client.
 pub struct Client {
     /// Control connection to the server.
-    conn: Option<Delimited<TcpStream>>,
+    connection: Option<Delimited<TcpStream>>,
 
     /// Destination address of the server.
     to: String,
@@ -57,7 +57,7 @@ impl Client {
         let auth = secret.map(Authenticator::new);
 
         if let Some(auth) = &auth {
-            auth.client_handshake(&mut stream).await.unwrap();
+            auth.client_handshake(&mut stream).await?;
         }
 
         let id = if require_auth {
@@ -70,9 +70,9 @@ impl Client {
             None
         };
 
-        stream.send(ClientMessage::Hello(0, id, static_port)).await.unwrap();
+        stream.send(ClientMessage::Hello(0, id, static_port)).await?;
 
-        let remote_port = match stream.recv_timeout().await.unwrap() {
+        let remote_port = match stream.recv_timeout().await? {
             Some(ServerMessage::Hello(remote_port)) => remote_port,
             Some(ServerMessage::Error(message)) => bail!("Server Error: {message}"),
             Some(ServerMessage::Challenge(_)) => bail!("Server Error: Server requires authentication, but no client secret was provided"),
@@ -101,7 +101,7 @@ impl Client {
         }
 
         Ok(Client {
-            conn: Some(stream),
+            connection: Some(stream),
             to: server.to_string(),
             local_host: host.to_string(),
             local_port: port,
@@ -113,7 +113,7 @@ impl Client {
     /// Start the client, listening for new connections.
     pub async fn listen(mut self) -> Result<()> {
         let control_port = self.control_port;
-        let mut conn = self.conn.take().unwrap();
+        let mut conn = self.connection.take().unwrap();
         let this = Arc::new(self);
         loop {
             match conn.recv().await? {
@@ -140,14 +140,16 @@ impl Client {
     }
 
     async fn handle_connection(&self, id: Uuid, control_port: u16) -> Result<()> {
-        let mut remote_conn =
-            Delimited::new(connect_with_timeout(&self.to[..], control_port).await?);
+        let mut remote_conn = Delimited::new(connect_with_timeout(&self.to[..], control_port).await?);
+
         if let Some(auth) = &self.auth {
             auth.client_handshake(&mut remote_conn).await?;
         }
+
         remote_conn.send(ClientMessage::Accept(id)).await?;
         let mut local_conn = connect_with_timeout(&self.local_host, self.local_port).await?;
         let parts = remote_conn.into_parts();
+
         debug_assert!(parts.write_buf.is_empty(), "framed write buffer not empty");
         local_conn.write_all(&parts.read_buf).await?; // mostly of the cases, this will be empty
         proxy(local_conn, parts.io).await?;
