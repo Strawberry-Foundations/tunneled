@@ -4,13 +4,15 @@
 use std::{io, net::SocketAddr, ops::RangeInclusive, sync::Arc, time::Duration};
 use std::fs::File;
 use std::io::Read;
+
+use tokio::io::AsyncWriteExt;
+use tokio::net::{TcpListener, TcpStream};
+use tokio::time::{sleep, timeout};
+
 use anyhow::Result;
 use dashmap::DashMap;
 use serde::Deserialize;
 use stblib::colors::{BOLD, C_RESET, CYAN, MAGENTA, RED, RESET, YELLOW};
-use tokio::io::AsyncWriteExt;
-use tokio::net::{TcpListener, TcpStream};
-use tokio::time::{sleep, timeout};
 use tracing::{info, info_span, Instrument};
 use uuid::Uuid;
 
@@ -28,7 +30,7 @@ pub struct Server {
     auth: Option<Authenticator>,
 
     /// Concurrent map of IDs to incoming connections.
-    conns: Arc<DashMap<Uuid, TcpStream>>,
+    connections: Arc<DashMap<Uuid, TcpStream>>,
 
     /// Access port for tunneled
     control_port: u16,
@@ -81,7 +83,7 @@ impl Server {
         assert!(!port_range.is_empty(), "must provide at least one port");
         Server {
             port_range,
-            conns: Arc::new(DashMap::new()),
+            connections: Arc::new(DashMap::new()),
             auth: secret.map(Authenticator::new),
             control_port,
             require_id,
@@ -252,7 +254,7 @@ impl Server {
                         LOGGER.info(format!("New connection at {addr}:{port}"));
 
                         let id = Uuid::new_v4();
-                        let conns = Arc::clone(&self.conns);
+                        let conns = Arc::clone(&self.connections);
 
                         conns.insert(id, stream2);
                         tokio::spawn(async move {
@@ -268,7 +270,7 @@ impl Server {
             }
             Some(ClientMessage::Accept(id)) => {
                 info!(%id, "Forwarding connection");
-                match self.conns.remove(&id) {
+                match self.connections.remove(&id) {
                     Some((_, mut stream2)) => {
                         let parts = stream.into_parts();
                         debug_assert!(parts.write_buf.is_empty(), "Framed write buffer not empty");
