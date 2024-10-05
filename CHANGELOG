@@ -1,0 +1,2 @@
+- Removed `.unwraps()` and implemented correct error handling
+- General improvements
