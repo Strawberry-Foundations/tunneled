@@ -1,8 +1,9 @@
-use stblib::colors::{C_RESET, BOLD, UNDERLINE, GREEN, LIGHT_GREEN, RED, YELLOW, WHITE, BLUE};
 use crate::statics::VERSION;
+use stblib::colors::{BLUE, BOLD, C_RESET, GREEN, LIGHT_GREEN, RED, UNDERLINE, WHITE, YELLOW};
 
 pub fn about() {
-    println!("\
+    println!(
+        "\
 * ---------- {BLUE}{BOLD}tunneled{C_RESET}{BOLD}{WHITE} ---------- *
 |             v{}             |
 | tunneled is a simple CLI tool  |
@@ -31,6 +32,8 @@ pub fn about() {
 |                                     |
 | https://opensource.org/license/gpl  |
 * ----------------------------------- *{C_RESET}
-", *VERSION);
+",
+        *VERSION
+    );
     std::process::exit(0);
 }

@@ -1,6 +1,5 @@
 //! Auth implementation for bore client and server.
 
-
 use anyhow::{bail, ensure, Result};
 use hmac::{Hmac, KeyInit, Mac};
 use sha2::{Digest, Sha256};
@@ -57,7 +56,10 @@ impl Authenticator {
         stream.send(ServerMessage::Challenge(challenge)).await?;
         match stream.recv_timeout().await? {
             Some(ClientMessage::Authenticate(tag)) => {
-                ensure!(self.validate(&challenge, &tag), "Server requires secret, but no client secret was provided");
+                ensure!(
+                    self.validate(&challenge, &tag),
+                    "Server requires secret, but no client secret was provided"
+                );
                 Ok(())
             }
             _ => bail!("Server requires secret, but no client secret was provided"),

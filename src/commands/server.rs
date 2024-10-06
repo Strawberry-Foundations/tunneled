@@ -1,20 +1,20 @@
 #![allow(unused_assignments)]
 //! Server implementation for the `bore` service.
 
-use std::{io, net::SocketAddr, ops::RangeInclusive, sync::Arc, time::Duration};
-use std::fs::File;
-use std::io::Read;
 use anyhow::Result;
 use dashmap::DashMap;
 use serde::Deserialize;
-use stblib::colors::{BOLD, C_RESET, CYAN, MAGENTA, RED, RESET, YELLOW};
+use stblib::colors::{BOLD, CYAN, C_RESET, MAGENTA, RED, RESET, YELLOW};
+use std::fs::File;
+use std::io::Read;
+use std::{io, net::SocketAddr, ops::RangeInclusive, sync::Arc, time::Duration};
 use tokio::io::AsyncWriteExt;
 use tokio::net::{TcpListener, TcpStream};
 use tokio::time::{sleep, timeout};
 use tracing::{info, info_span, Instrument};
 use uuid::Uuid;
 
-use crate::auth::authenticator::{ClientAuthentication};
+use crate::auth::authenticator::ClientAuthentication;
 use crate::auth::secret::Authenticator;
 use crate::shared::{proxy, ClientMessage, Delimited, ServerMessage};
 use crate::statics::{LOGGER, LOGGER_2, STRAWBERRY_ID_API, VERSION};
@@ -37,7 +37,7 @@ pub struct Server {
     require_id: bool,
 
     /// Whitelist for static port users
-    whitelist_static_port: Vec<String>
+    whitelist_static_port: Vec<String>,
 }
 
 #[derive(Debug, Deserialize, Clone)]
@@ -57,7 +57,7 @@ pub struct Config {
 
 #[derive(Debug, Deserialize, Clone)]
 pub struct ServerConfig {
-    pub server: Config
+    pub server: Config,
 }
 
 pub fn read_config_file(file_path: &str) -> Result<ServerConfig, Box<dyn std::error::Error>> {
@@ -77,7 +77,13 @@ pub fn read_config_file(file_path: &str) -> Result<ServerConfig, Box<dyn std::er
 
 impl Server {
     /// Create a new server with a specified minimum port number.
-    pub fn new(port_range: RangeInclusive<u16>, secret: Option<&str>, control_port: u16, require_id: bool, whitelist: Vec<String>) -> Self {
+    pub fn new(
+        port_range: RangeInclusive<u16>,
+        secret: Option<&str>,
+        control_port: u16,
+        require_id: bool,
+        whitelist: Vec<String>,
+    ) -> Self {
         assert!(!port_range.is_empty(), "must provide at least one port");
         Server {
             port_range,
@@ -85,7 +91,7 @@ impl Server {
             auth: secret.map(Authenticator::new),
             control_port,
             require_id,
-            whitelist_static_port: whitelist
+            whitelist_static_port: whitelist,
         }
     }
 
@@ -99,7 +105,9 @@ impl Server {
         LOGGER.info(format!("Server is listening on {addr}"));
 
         if this.require_id {
-            LOGGER_2.info(format!("Using Strawberry ID Authentication ({STRAWBERRY_ID_API})"));
+            LOGGER_2.info(format!(
+                "Using Strawberry ID Authentication ({STRAWBERRY_ID_API})"
+            ));
         }
 
         loop {
@@ -110,7 +118,9 @@ impl Server {
                     LOGGER.info(format!("[{MAGENTA}{addr}{RESET}] Incoming connection"));
 
                     if let Err(err) = this.handle_connection(stream).await {
-                        LOGGER.warning(format!("[{MAGENTA}{addr}{RESET}] Connection exited with error {err}"));
+                        LOGGER.warning(format!(
+                            "[{MAGENTA}{addr}{RESET}] Connection exited with error {err}"
+                        ));
                     } else {
                         LOGGER.info(format!("[{MAGENTA}{addr}{RESET}] Connection exited"));
                     }
@@ -121,7 +131,12 @@ impl Server {
     }
 
     #[allow(unused_assignments)]
-    async fn create_listener(&self, port: u16, static_port: Option<u16>, id: &Option<ClientAuthentication>) -> Result<TcpListener, &'static str> {
+    async fn create_listener(
+        &self,
+        port: u16,
+        static_port: Option<u16>,
+        id: &Option<ClientAuthentication>,
+    ) -> Result<TcpListener, &'static str> {
         let try_bind = |port: u16| async move {
             TcpListener::bind(("0.0.0.0", port))
                 .await
@@ -134,25 +149,25 @@ impl Server {
 
         if let Some(static_port) = static_port {
             if let Some(id) = id {
-                if self.whitelist_static_port.contains(&id.strawberry_id.email.to_string()) {
+                if self
+                    .whitelist_static_port
+                    .contains(&id.strawberry_id.email.to_string())
+                {
                     match try_bind(static_port).await {
                         Ok(listener) => Ok(listener),
                         Err(err) => {
                             LOGGER.error(format!("Failed to bind to port: {err}"));
 
                             Err("Port is not available")
-                        },
+                        }
                     }
-                }
-                else {
+                } else {
                     Err("You are not allowed to use static ports")
                 }
-            }
-            else {
+            } else {
                 Err("This feature is currently only available to whitelisted Strawberry ID users")
             }
-        }
-        else if port > 0 {
+        } else if port > 0 {
             // Client requests a specific port number.
             if !self.port_range.contains(&port) {
                 return Err("client port number not in allowed range");
@@ -184,7 +199,9 @@ impl Server {
         if let Some(auth) = &self.auth {
             if let Err(err) = auth.server_handshake(&mut stream).await {
                 LOGGER.warning("Server handshake failed".to_string());
-                stream.send(ServerMessage::Error(format!("Handshake failed - {err}"))).await?;
+                stream
+                    .send(ServerMessage::Error(format!("Handshake failed - {err}")))
+                    .await?;
                 return Ok(());
             }
         }
@@ -204,15 +221,19 @@ impl Server {
                         let auth = id.verify(&username, &token).await?;
 
                         if let Some(auth) = auth.clone() {
-                            LOGGER.info(format!(" ↳ Authentication successful ({} (@{}))", auth.strawberry_id.full_name, auth.strawberry_id.username));
-
+                            LOGGER.info(format!(
+                                " ↳ Authentication successful ({} (@{}))",
+                                auth.strawberry_id.full_name, auth.strawberry_id.username
+                            ));
                         } else {
                             LOGGER.info(format!(" ↳ {YELLOW}{BOLD}!{C_RESET} Invalid Strawberry ID Auth (@{username})"));
-                            stream.send(ServerMessage::Error("Invalid Strawberry ID".to_string())).await?;
-                            
-                            return Ok(())
+                            stream
+                                .send(ServerMessage::Error("Invalid Strawberry ID".to_string()))
+                                .await?;
+
+                            return Ok(());
                         }
-                        
+
                         auth
                     } else {
                         LOGGER.info(format!(" ↳ {YELLOW}{BOLD}!{C_RESET} Invalid Strawberry ID Auth (Client connected without Strawberry ID)"));
@@ -227,7 +248,10 @@ impl Server {
                     None
                 };
 
-                let listener = match self.create_listener(port, static_port, &strawberry_id).await {
+                let listener = match self
+                    .create_listener(port, static_port, &strawberry_id)
+                    .await
+                {
                     Ok(listener) => listener,
                     Err(err) => {
                         stream.send(ServerMessage::Error(err.into())).await?;
@@ -282,7 +306,7 @@ impl Server {
             None => {
                 LOGGER.warning("Client sent empty response");
                 Ok(())
-            },
+            }
         }
     }
 }

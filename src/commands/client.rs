@@ -4,15 +4,15 @@
 use std::sync::Arc;
 
 use anyhow::{bail, Context, Result};
-use stblib::colors::{BOLD, C_RESET, CYAN, RED, RESET};
+use stblib::colors::{BOLD, CYAN, C_RESET, RED, RESET};
 use tokio::{io::AsyncWriteExt, net::TcpStream, time::timeout};
 use tracing::{error, info, info_span, warn, Instrument};
 use uuid::Uuid;
 
 use crate::auth::authenticator::StrawberryIdAuthenticator;
 use crate::auth::secret::Authenticator;
-use crate::shared::{proxy, ClientMessage, Delimited, ServerMessage, NETWORK_TIMEOUT};
 use crate::commands::compose::Service;
+use crate::shared::{proxy, ClientMessage, Delimited, ServerMessage, NETWORK_TIMEOUT};
 use crate::statics::{LOGGER, LOGGER_2};
 
 /// State structure for the client.
@@ -28,13 +28,12 @@ pub struct Client {
 
     /// Local port that is forwarded.
     local_port: u16,
-    
+
     /// Tcp connection port for remote server
     control_port: u16,
 
     /// Optional secret used to authenticate clients.
     auth: Option<Authenticator>,
-    
 }
 
 impl Client {
@@ -47,12 +46,16 @@ impl Client {
         static_port: Option<u16>,
         control_port: u16,
         require_auth: bool,
-        service: Option<&Service>
+        service: Option<&Service>,
     ) -> Result<Self> {
-        let mut stream = Delimited::new(connect_with_timeout(server, control_port).await.unwrap_or_else(|err| {
-            eprintln!(" {RED}{BOLD}!{C_RESET}  Server Error: {err}");
-            std::process::exit(1)
-        }));
+        let mut stream = Delimited::new(
+            connect_with_timeout(server, control_port)
+                .await
+                .unwrap_or_else(|err| {
+                    eprintln!(" {RED}{BOLD}!{C_RESET}  Server Error: {err}");
+                    std::process::exit(1)
+                }),
+        );
 
         let auth = secret.map(Authenticator::new);
 
@@ -63,25 +66,32 @@ impl Client {
         let id = if require_auth {
             match StrawberryIdAuthenticator::fetch() {
                 Ok(id) => Some(id),
-                Err(_) => None
+                Err(_) => None,
             }
-        }
-        else {
+        } else {
             None
         };
 
-        stream.send(ClientMessage::Hello(0, id, static_port)).await.unwrap();
+        stream
+            .send(ClientMessage::Hello(0, id, static_port))
+            .await
+            .unwrap();
 
         let remote_port = match stream.recv_timeout().await.unwrap() {
             Some(ServerMessage::Hello(remote_port)) => remote_port,
             Some(ServerMessage::Error(message)) => bail!("Server Error: {message}"),
-            Some(ServerMessage::Challenge(_)) => bail!("Server Error: Server requires authentication, but no client secret was provided"),
+            Some(ServerMessage::Challenge(_)) => bail!(
+                "Server Error: Server requires authentication, but no client secret was provided"
+            ),
             Some(_) => bail!("Server Error: unexpected initial non-hello message"),
             None => bail!("Server Error: unexpected EOF"),
         };
 
         if let Some(service) = service {
-            LOGGER.default(format!("Starting tunneling service '{CYAN}{}{RESET}'", service.name));
+            LOGGER.default(format!(
+                "Starting tunneling service '{CYAN}{}{RESET}'",
+                service.name
+            ));
             LOGGER.info(format!("Forwarding rule: {host}:{port}->{server}"));
         }
 
@@ -130,7 +140,7 @@ impl Client {
                                 Err(err) => warn!(%err, "connection exited with error"),
                             }
                         }
-                            .instrument(info_span!("proxy", %id)),
+                        .instrument(info_span!("proxy", %id)),
                     );
                 }
                 Some(ServerMessage::Error(err)) => error!(%err, "server error"),

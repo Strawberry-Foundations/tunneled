@@ -1,7 +1,7 @@
 use lazy_static::lazy_static;
 
+use stblib::colors::{BLUE, BOLD, CYAN, C_RESET, GREEN, RED, YELLOW};
 use stblib::logging::Logger;
-use stblib::colors::{BLUE, BOLD, C_RESET, CYAN, GREEN, RED, YELLOW};
 
 // pub const STRAWBERRY_ID_API: &str = "http://192.168.0.194:8082/v1/";
 pub const STRAWBERRY_ID_API: &str = "https://id.strawberryfoundations.org/v2/";

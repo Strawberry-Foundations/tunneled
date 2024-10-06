@@ -11,27 +11,27 @@
 //! There are two components to the crate, offering implementations of the
 //! server network daemon and client local forwarding proxy. Both are public
 //! members and can be run programmatically with a Tokio 1.0 runtime.
+
+use crate::auth::Auth;
 use anyhow::Result;
 use stblib::colors::{BOLD, C_RESET, RED, RESET};
-use crate::auth::Auth;
 
-use crate::commands::client::Client;
-use crate::commands::server::{read_config_file, Server};
-use crate::commands::compose::compose;
 use crate::commands::auth::auth;
-use crate::commands::serial::serial_session;
+use crate::commands::client::Client;
+use crate::commands::compose::compose;
+use crate::commands::server::{read_config_file, Server};
 
-use crate::cli::{ARGS, OPTIONS};
 use crate::cli::args::Command;
+use crate::cli::{ARGS, OPTIONS};
 
+pub mod auth;
 pub mod cli;
 pub mod commands;
-pub mod statics;
-pub mod auth;
 pub mod shared;
+pub mod statics;
 
 #[tokio::main]
-async fn main() -> Result <()> {
+async fn main() -> Result<()> {
     match ARGS.command {
         Command::Local => {
             let client = Client::new(
@@ -43,22 +43,24 @@ async fn main() -> Result <()> {
                 OPTIONS.client_options.control_port,
                 OPTIONS.client_options.auth,
                 None,
-                
-            ).await.unwrap_or_else(|err| {
+            )
+            .await
+            .unwrap_or_else(|err| {
                 eprintln!("{RED}{BOLD} ! {C_RESET} {err}");
                 std::process::exit(1);
             });
 
-            client.listen().await.unwrap_or_else(|err| {
-                eprintln!("{RED}{BOLD} ! {C_RESET} {err}")
-            });
+            client
+                .listen()
+                .await
+                .unwrap_or_else(|err| eprintln!("{RED}{BOLD} ! {C_RESET} {err}"));
         }
-        Command::Compose => {
-            compose(OPTIONS.client_options.compose_file.as_deref()).await.unwrap_or_else(|err| {
+        Command::Compose => compose(OPTIONS.client_options.compose_file.as_deref())
+            .await
+            .unwrap_or_else(|err| {
                 eprintln!("{RED}{BOLD} ! {C_RESET} {err}");
                 std::process::exit(1);
-            })
-        }
+            }),
         Command::Server => {
             if let Some(config_file) = OPTIONS.server_options.config_file.as_deref() {
                 let config = read_config_file(config_file).unwrap_or_else(|err| {
@@ -75,10 +77,11 @@ async fn main() -> Result <()> {
                     config.server.secret.as_deref(),
                     config.server.control_port.unwrap_or(7835),
                     config.server.require_id.unwrap_or(false),
-                    config.server.whitelist_static_port.unwrap_or_default()
-                ).listen().await?;
-            }
-            else {
+                    config.server.whitelist_static_port.unwrap_or_default(),
+                )
+                .listen()
+                .await?;
+            } else {
                 let port_range = OPTIONS.server_options.min_port..=OPTIONS.server_options.max_port;
                 if port_range.is_empty() {
                     eprintln!("{RED}{BOLD} ! {RESET} Port range is empty{C_RESET}");
@@ -89,15 +92,16 @@ async fn main() -> Result <()> {
                     OPTIONS.server_options.control_port,
                     OPTIONS.server_options.require_id,
                     Vec::new(),
-                ).listen().await?;
+                )
+                .listen()
+                .await?;
             }
-
         }
         Command::Auth => {
             auth(Auth::strawberry_id()).await?;
         }
         Command::Serial => {
-            let _serial = serial_session("/dev/ttys001", 9600);
+            commands::serial::test_serial();
         }
         Command::About => commands::about::about(),
         Command::None => commands::help::help(),
