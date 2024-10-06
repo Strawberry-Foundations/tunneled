@@ -25,6 +25,7 @@ fn serial_session(device: &str, mut baud_rate: u32) -> Result<TTYPort, serialpor
     }
 }
 
+#[allow(clippy::unused_io_amount)]
 pub(crate) fn test_serial() {
     let mut serial = serial_session("/dev/ttys002", 9600).unwrap();
     serial
