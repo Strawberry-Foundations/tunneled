@@ -98,7 +98,7 @@ impl Server {
         let listener = TcpListener::bind(&addr).await?;
 
         LOGGER_2.default(format!("Starting Tunneled server v{}", *VERSION));
-        LOGGER.info(format!("Server is listening on {addr}"));
+        LOGGER.info(format!("Server is listening on {MAGENTA}{addr}{C_RESET}"));
 
         if this.require_id {
             LOGGER_2.info(format!("Using Strawberry ID Authentication ({STRAWBERRY_ID_API})"));
