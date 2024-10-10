@@ -177,20 +177,20 @@ impl Args {
                     if let Some(val) = iter.next() {
                         if let Ok(file) = val.parse::<String>() {
                             match &self.command {
-                                Command::Local => options.client_options.compose_file = Option::from(file),
+                                Command::Compose => options.client_options.compose_file = Option::from(file),
                                 Command::Server => options.server_options.config_file = Option::from(file),
                                 _ => { }
                             }
                         } else {
                             match &self.command {
-                                Command::Local => eprintln!("{RED}{BOLD} ! {RESET} Invalid compose file{C_RESET}"),
+                                Command::Compose => eprintln!("{RED}{BOLD} ! {RESET} Invalid compose file{C_RESET}"),
                                 Command::Server => eprintln!("{RED}{BOLD} ! {RESET} Invalid config file{C_RESET}"),
                                 _ => { }
                             }
                         }
                     } else {
                         match &self.command {
-                            Command::Local => eprintln!("{RED}{BOLD} ! {RESET} Missing compose file{C_RESET}"),
+                            Command::Compose => eprintln!("{RED}{BOLD} ! {RESET} Missing compose file{C_RESET}"),
                             Command::Server => eprintln!("{RED}{BOLD} ! {RESET} Missing config file{C_RESET}"),
                             _ => { }
                         }
