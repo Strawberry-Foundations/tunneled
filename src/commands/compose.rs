@@ -4,7 +4,7 @@ use anyhow::Result;
 use serde::Deserialize;
 use stblib::colors::{BOLD, C_RESET, CYAN, RED, RESET};
 
-use crate::commands::client::Client;
+use crate::commands::local::Client;
 
 
 #[derive(Debug, Deserialize, Clone)]
