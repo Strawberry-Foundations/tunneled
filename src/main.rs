@@ -25,7 +25,7 @@ use crate::cli::args::Command;
 
 pub mod cli;
 pub mod commands;
-pub mod statics;
+pub mod constants;
 pub mod auth;
 pub mod shared;
 
