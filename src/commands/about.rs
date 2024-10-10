@@ -14,7 +14,7 @@ pub fn about() {
 |     Strawberry Foundations     |
 |                                |
 | Made possible with the help of |
-|     github.com/ekzhang/bore    |
+|     {BLUE}github.com/ekzhang/bore{C_RESET}    |
 * ------------------------------ *
 
 * ----------- {BOLD}{YELLOW}WARNING{C_RESET}{BOLD} ---------- *
@@ -29,7 +29,7 @@ pub fn about() {
 |        GPL-V3 (original MIT)        |
 |         Open Source License         |
 |                                     |
-| https://opensource.org/license/gpl  |
+| {BLUE}https://opensource.org/license/gpl{C_RESET}  |
 * ----------------------------------- *{C_RESET}
 ", *VERSION);
     std::process::exit(0);
