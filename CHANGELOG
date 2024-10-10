@@ -3,3 +3,4 @@
 - Update dependencies
 - Fixed critical issue with compose command -> Providing a file that is not named `services.yml` didn't worked
 - Better terminal color formatting
+- Strawberry ID improvements
