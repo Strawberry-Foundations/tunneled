@@ -14,7 +14,7 @@
 use anyhow::Result;
 use stblib::colors::{BOLD, C_RESET, RED, RESET};
 
-use crate::commands::client::Client;
+use crate::commands::local::Client;
 use crate::commands::server::{read_config_file, Server};
 use crate::commands::compose::compose;
 use crate::commands::auth::auth;
