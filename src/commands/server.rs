@@ -19,7 +19,7 @@ use uuid::Uuid;
 use crate::auth::authenticator::{ClientAuthentication};
 use crate::auth::secret::Authenticator;
 use crate::shared::{proxy, ClientMessage, Delimited, ServerMessage};
-use crate::statics::{LOGGER, LOGGER_2, STRAWBERRY_ID_API, VERSION};
+use crate::constants::{LOGGER, LOGGER_2, STRAWBERRY_ID_API, VERSION};
 
 /// State structure for the server.
 pub struct Server {
