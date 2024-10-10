@@ -1,5 +1,5 @@
 #![allow(unused_assignments)]
-//! Server implementation for the `bore` service.
+//! Server implementation for the `tunneled` service.
 
 use std::{io, net::SocketAddr, ops::RangeInclusive, sync::Arc, time::Duration};
 use std::fs::File;
