@@ -32,7 +32,7 @@ impl StrawberryId {
 
             if let Ok(data) = self.serializer(body.as_str()) {
                 if data["data"]["status"] != "Invalid Code" && data["data"]["status"] != "Not authenticated" {
-                    println!("{GREEN}{BOLD}Authentication successful (Strawberry ID){C_RESET}");
+                    println!("{GREEN}{BOLD}Authentication successful{C_RESET}");
 
                     self.email = data["data"]["user"]["email"].as_str().unwrap().to_string();
                     self.full_name = data["data"]["user"]["full_name"].as_str().unwrap().to_string();
