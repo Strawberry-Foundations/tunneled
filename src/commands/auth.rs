@@ -1,7 +1,7 @@
 use std::fs;
 use serde::{Deserialize, Serialize};
 
-use stblib::colors::{BLUE, BOLD, CYAN, C_RESET, GREEN, RED, RESET, YELLOW};
+use stblib::colors::{BLUE, BOLD, CYAN, C_RESET, GRAY, GREEN, RED, RESET, YELLOW};
 
 use crate::auth::strawberry_id::StrawberryId;
 use crate::constants::STRAWBERRY_ID_API;
@@ -30,8 +30,8 @@ pub async fn auth(mut auth: StrawberryId) -> anyhow::Result<()> {
     };
 
     println!(
-        "To continue with the registration, open the following page and authorise access to your Strawberry ID:\n\
-        {BOLD}{BLUE}{STRAWBERRY_ID_API}de/login/oauth_dialog/tunneled?code={code}{C_RESET}"
+        "To continue with the registration, open the following page and authorise access to your Strawberry ID\n\
+        {GRAY}-> {BOLD}{BLUE}{STRAWBERRY_ID_API}de/login/oauth_dialog/tunneled?code={code}{C_RESET}"
     );
 
     let credentials = auth.login(code).await?;
@@ -59,13 +59,16 @@ pub async fn auth(mut auth: StrawberryId) -> anyhow::Result<()> {
                     if let Err(err) = fs::write(&credentials_path, credentials_str) {
                         eprintln!("{RED}{BOLD}Error while writing file:{RESET} {}{C_RESET}", err);
                     } else {
-                        println!("{GREEN}{BOLD}Credentials saved successfully to {:?}{C_RESET}", credentials_path);
+                        println!("{GREEN}{BOLD}Credentials saved successfully to {}{C_RESET}", credentials_path.display());
                     }
                 }
                 Err(err) => eprintln!("{RED}{BOLD}Error while serializing data:{RESET} {}{C_RESET}", err),
             }
         } else {
-            println!("{YELLOW}{BOLD}credentials.yml already exists at {:?}{C_RESET}", credentials_path);
+            println!(
+                "{YELLOW}{BOLD}You are already logged in with your Strawberry ID.\n\
+                To log out, delete the following file: {}{C_RESET}", credentials_path.display()
+            );
         }
 
     } else {
