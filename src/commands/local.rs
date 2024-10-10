@@ -4,7 +4,7 @@
 use std::sync::Arc;
 
 use anyhow::{bail, Context, Result};
-use stblib::colors::{BOLD, C_RESET, CYAN, RED, RESET};
+use stblib::colors::{BOLD, C_RESET, CYAN, RED, RESET, BLUE, ITALIC, MAGENTA};
 use tokio::{io::AsyncWriteExt, net::TcpStream, time::timeout};
 use tracing::{error, info, info_span, warn, Instrument};
 use uuid::Uuid;
@@ -82,19 +82,19 @@ impl Client {
 
         if let Some(service) = service {
             LOGGER.default(format!("Starting tunneling service '{CYAN}{}{RESET}'", service.name));
-            LOGGER.info(format!("Forwarding rule: {host}:{port}->{server}"));
+            LOGGER.info(format!("Forwarding rule: {BLUE}{host}:{port}{RESET}->{ITALIC}{MAGENTA}{server}{RESET}"));
         }
 
         if service.is_none() {
-            LOGGER.default(format!("Starting tunneling for {host}:{port}->{server}"));
+            LOGGER.default(format!("Starting tunneling for {BLUE}{host}:{port}{RESET}->{ITALIC}{MAGENTA}{server}{RESET}"));
         }
 
         if require_auth {
             LOGGER_2.info("Using Strawberry ID Authentication");
         }
 
-        LOGGER.info(format!("Connected to server {server}"));
-        LOGGER.info(format!("Listening at {server}:{remote_port}"));
+        LOGGER.info(format!("Connected to server {MAGENTA}{ITALIC}{server}{C_RESET}"));
+        LOGGER.info(format!("Listening at {BLUE}{server}:{remote_port}{RESET}"));
 
         if service.is_some() {
             println!()
