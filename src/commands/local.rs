@@ -13,7 +13,7 @@ use crate::auth::authenticator::StrawberryIdAuthenticator;
 use crate::auth::secret::Authenticator;
 use crate::shared::{proxy, ClientMessage, Delimited, ServerMessage, NETWORK_TIMEOUT};
 use crate::commands::compose::Service;
-use crate::statics::{LOGGER, LOGGER_2};
+use crate::constants::{LOGGER, LOGGER_2};
 
 /// State structure for the client.
 pub struct Client {
