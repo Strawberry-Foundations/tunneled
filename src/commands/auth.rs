@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use stblib::colors::{BLUE, BOLD, CYAN, C_RESET, GREEN, RED, RESET, YELLOW};
 
 use crate::auth::strawberry_id::StrawberryId;
-use crate::statics::STRAWBERRY_ID_API;
+use crate::constants::STRAWBERRY_ID_API;
 
 #[derive(Debug, Serialize, Deserialize)]
 struct Credentials {
