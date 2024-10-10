@@ -1,5 +1,5 @@
 #![allow(clippy::too_many_arguments)]
-//! Client implementation for the `bore` service.
+//! Client implementation for the `tunneled` service.
 
 use std::sync::Arc;
 
