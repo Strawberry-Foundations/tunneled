@@ -1,0 +1,15 @@
+[package]
+name = "example_plugin"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+stblib = { version = "0.6.3-pre2", features = ["plugin"]}
+
+[lib]
+crate-type = ["cdylib"]
+
+[profile.release]
+opt-level = 'z'
+strip = true
+lto = true
