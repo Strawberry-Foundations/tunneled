@@ -7,6 +7,7 @@ pub enum Command {
     Compose,
     Auth,
     About,
+    Plugin,
     None
 }
 
@@ -72,6 +73,7 @@ impl Args {
             "auth" => args.command = Command::Auth,
             "about" => args.command = Command::About,
             "compose" => args.command = Command::Compose,
+            "plugin" => args.command = Command::Plugin,
             _ => args.command = Command::None,
         }
 
