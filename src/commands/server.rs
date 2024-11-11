@@ -12,7 +12,7 @@ use tokio::time::{sleep, timeout};
 use anyhow::Result;
 use dashmap::DashMap;
 use serde::Deserialize;
-use stblib::colors::{BOLD, C_RESET, CYAN, MAGENTA, RED, RESET, YELLOW, BLUE};
+use stblib::colors::{BOLD, C_RESET, CYAN, MAGENTA, RED, RESET, YELLOW, BLUE, GREEN, ITALIC};
 use tracing::{info, info_span, Instrument};
 use uuid::Uuid;
 
@@ -211,7 +211,7 @@ impl Server {
                         let auth = id.verify(&username, &token).await?;
 
                         if let Some(auth) = auth.clone() {
-                            LOGGER.info(format!("[{MAGENTA}{addr}{RESET}] Authentication successful ({} (@{}))", auth.strawberry_id.full_name, auth.strawberry_id.username));
+                            LOGGER.info(format!("[{MAGENTA}{addr}{RESET}] Authentication successful ({GREEN}{}{C_RESET} ({ITALIC}{CYAN}@{}{C_RESET}))", auth.strawberry_id.full_name, auth.strawberry_id.username));
 
                         } else {
                             LOGGER.info(format!("[{MAGENTA}{addr}{RESET}] {YELLOW}{BOLD}<!>{C_RESET} Invalid Strawberry ID Auth (@{username})"));
