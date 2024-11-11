@@ -55,7 +55,7 @@ impl Args {
         let mut result = Args {
             args: args.clone(),
             command: Command::None,
-            command_str: args.get(0).cloned().unwrap_or_default(),
+            command_str: args.first().cloned().unwrap_or_default(),
             options: Options::default(),
         };
 
