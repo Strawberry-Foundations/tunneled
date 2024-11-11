@@ -211,14 +211,10 @@ impl Server {
                         let auth = id.verify(&username, &token).await?;
 
                         if let Some(auth) = auth.clone() {
-                            if OPTIONS.server_options.verbose_logging {
-                                LOGGER.info(format!("[{MAGENTA}{addr}{RESET}] Authentication successful ({} (@{}))", auth.strawberry_id.full_name, auth.strawberry_id.username));
-                            }
+                            LOGGER.info(format!("[{MAGENTA}{addr}{RESET}] Authentication successful ({} (@{}))", auth.strawberry_id.full_name, auth.strawberry_id.username));
 
                         } else {
-                            if OPTIONS.server_options.verbose_logging {
-                                LOGGER.info(format!("[{MAGENTA}{addr}{RESET}] {YELLOW}{BOLD}<!>{C_RESET} Invalid Strawberry ID Auth (@{username})"));
-                            }
+                            LOGGER.info(format!("[{MAGENTA}{addr}{RESET}] {YELLOW}{BOLD}<!>{C_RESET} Invalid Strawberry ID Auth (@{username})"));
                             stream.send(ServerMessage::Error("Invalid Strawberry ID".to_string())).await?;
                             
                             return Ok(())
@@ -226,9 +222,7 @@ impl Server {
                         
                         auth
                     } else {
-                        if OPTIONS.server_options.verbose_logging {
-                            LOGGER.info(format!("[{MAGENTA}{addr}{RESET}] {YELLOW}{BOLD}<!>{C_RESET} Invalid Strawberry ID Auth (Client connected without Strawberry ID)"));
-                        }
+                        LOGGER.info(format!("[{MAGENTA}{addr}{RESET}] {YELLOW}{BOLD}<!>{C_RESET} Invalid Strawberry ID Auth (Client connected without Strawberry ID)"));
 
                         stream.send(ServerMessage::Error(
                             "This server requires a Strawberry ID which you didn't provide. \
@@ -266,7 +260,10 @@ impl Server {
                     const TIMEOUT: Duration = Duration::from_millis(500);
                     if let Ok(result) = timeout(TIMEOUT, listener.accept()).await {
                         let (stream2, addr) = result?;
-                        LOGGER.info(format!("New connection at {addr}:{port}"));
+
+                        if OPTIONS.server_options.verbose_logging {
+                            LOGGER.info(format!("External connection at {addr}:{port}"));
+                        }
 
                         let id = Uuid::new_v4();
                         let connections = Arc::clone(&self.connections);
