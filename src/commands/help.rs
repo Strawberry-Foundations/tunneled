@@ -19,6 +19,7 @@ pub fn help() {
             {CYAN}{BOLD}-a, --auth{C_RESET}              Use Strawberry ID for Authentication  {GREEN}{BOLD}[optional]{C_RESET}
             {CYAN}{BOLD}-cp, --control-port{C_RESET}     Control port for remote proxy server  {GREEN}{BOLD}[default: 7835]{C_RESET}
             {CYAN}{BOLD}-sp, --static-port{C_RESET}      Static port forwarding (whitelist)    {GREEN}{BOLD}[optional]{C_RESET}
+            {CYAN}{BOLD}-v, --verbose    {C_RESET}       Enable verbose logging                {GREEN}{BOLD}[optional]{C_RESET}
 
     {CYAN}{BOLD}server:{C_RESET} Runs the remote proxy server
      {BOLD}↳ {MAGENTA}Options:{C_RESET}
