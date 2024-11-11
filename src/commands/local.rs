@@ -4,13 +4,14 @@
 use std::sync::Arc;
 
 use anyhow::{bail, Context, Result};
-use stblib::colors::{BOLD, C_RESET, CYAN, RED, RESET, BLUE, ITALIC, MAGENTA};
+use stblib::colors::{BOLD, C_RESET, CYAN, RED, RESET, BLUE, ITALIC, MAGENTA, GRAY};
 use tokio::{io::AsyncWriteExt, net::TcpStream, time::timeout};
-use tracing::{error, info, info_span, warn, Instrument};
+use tracing::{info_span, Instrument};
 use uuid::Uuid;
 
 use crate::auth::authenticator::StrawberryIdAuthenticator;
 use crate::auth::secret::Authenticator;
+use crate::cli::OPTIONS;
 use crate::shared::{proxy, ClientMessage, Delimited, ServerMessage, NETWORK_TIMEOUT};
 use crate::commands::compose::Service;
 use crate::constants::{LOGGER, LOGGER_2};
@@ -117,24 +118,32 @@ impl Client {
         let this = Arc::new(self);
         loop {
             match conn.recv().await? {
-                Some(ServerMessage::Hello(_)) => warn!("unexpected hello"),
-                Some(ServerMessage::Challenge(_)) => warn!("unexpected challenge"),
+                Some(ServerMessage::Hello(_)) => LOGGER.warning("Unexpected hello"),
+                Some(ServerMessage::Challenge(_)) => LOGGER.warning("Unexpected challenge"),
                 Some(ServerMessage::Heartbeat) => (),
                 Some(ServerMessage::Connection(id)) => {
                     let this = Arc::clone(&this);
                     tokio::spawn(
                         async move {
-                            info!("new connection");
-                            match this.handle_connection(id, control_port).await {
-                                Ok(_) => info!("connection exited"),
-                                Err(err) => warn!(%err, "connection exited with error"),
+                            if OPTIONS.client_options.verbose_logging {
+                                LOGGER.info(format!("New connection ({GRAY}{id}{C_RESET})"));    
                             }
-                        }
-                            .instrument(info_span!("proxy", %id)),
+                            match this.handle_connection(id, control_port).await {
+                                Ok(_) => if OPTIONS.client_options.verbose_logging {
+                                    LOGGER.info(format!("Connection exited ({GRAY}{id}{C_RESET})"))
+                                },
+                                Err(err) => if OPTIONS.client_options.verbose_logging {
+                                    LOGGER.error(format!("Connection ({GRAY}{id}{C_RESET}) exited with error: {err}"))
+                                },
+                            }
+                        }.instrument(info_span!("proxy", %id)),
                     );
                 }
-                Some(ServerMessage::Error(err)) => error!(%err, "server error"),
-                None => return Ok(()),
+                Some(ServerMessage::Error(err)) => LOGGER.error(format!("Server error: {err}")),
+                None => {
+                    LOGGER.error("Lost connection to tunneled instance");
+                    return Ok(());
+                }
             }
         }
     }
@@ -162,5 +171,5 @@ pub async fn connect_with_timeout(to: &str, port: u16) -> Result<TcpStream> {
         Ok(res) => res,
         Err(err) => Err(err.into()),
     }
-    .with_context(|| format!("could not connect to {to}:{port}"))
+    .with_context(|| format!("Could not connect to {to}:{port}"))
 }
