@@ -21,6 +21,7 @@ pub struct ServerOptions {
     pub require_id: bool,
     pub control_port: u16,
     pub config_file: Option<String>,
+    pub verbose_logging: bool,
 }
 
 #[derive(Default)]
@@ -59,7 +60,6 @@ impl Args {
             options: Options::default(),
         };
 
-        // Using a HashMap for command lookup for scalability
         let command_map = HashMap::from([
             ("local", Command::Local),
             ("server", Command::Server),
@@ -136,6 +136,7 @@ impl Args {
                 "--min-port" => parse_u16(iter.next(), &mut options.server_options.min_port, "minimum port"),
                 "--max-port" => parse_u16(iter.next(), &mut options.server_options.max_port, "maximum port"),
                 "-a" | "--auth" => options.client_options.auth = true,
+                "-v" | "--verbose" => options.server_options.verbose_logging = true,
                 "-id" | "--require-id" => options.server_options.require_id = true,
                 other => {
                     if let Ok(port) = other.parse::<u16>() {
