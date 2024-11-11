@@ -211,7 +211,10 @@ impl Server {
                         let auth = id.verify(&username, &token).await?;
 
                         if let Some(auth) = auth.clone() {
-                            LOGGER.info(format!("[{MAGENTA}{addr}{RESET}] Authentication successful ({GREEN}{}{C_RESET} ({ITALIC}{CYAN}@{}{C_RESET}))", auth.strawberry_id.full_name, auth.strawberry_id.username));
+                            LOGGER.info(format!(
+                                "[{MAGENTA}{addr}{RESET}] Authentication successful ({GREEN}{}{C_RESET} ({ITALIC}{CYAN}@{}{C_RESET}))", 
+                                auth.strawberry_id.full_name, auth.strawberry_id.username
+                            ));
 
                         } else {
                             LOGGER.info(format!("[{MAGENTA}{addr}{RESET}] {YELLOW}{BOLD}<!>{C_RESET} Invalid Strawberry ID Auth (@{username})"));
