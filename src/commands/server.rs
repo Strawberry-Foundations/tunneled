@@ -12,12 +12,13 @@ use tokio::time::{sleep, timeout};
 use anyhow::Result;
 use dashmap::DashMap;
 use serde::Deserialize;
-use stblib::colors::{BOLD, C_RESET, CYAN, MAGENTA, RED, RESET, YELLOW};
+use stblib::colors::{BOLD, C_RESET, CYAN, MAGENTA, RED, RESET, YELLOW, BLUE};
 use tracing::{info, info_span, Instrument};
 use uuid::Uuid;
 
 use crate::auth::authenticator::{ClientAuthentication};
 use crate::auth::secret::Authenticator;
+use crate::cli::OPTIONS;
 use crate::shared::{proxy, ClientMessage, Delimited, ServerMessage};
 use crate::constants::{LOGGER, LOGGER_2, STRAWBERRY_ID_API, VERSION};
 
@@ -109,11 +110,13 @@ impl Server {
             let this = Arc::clone(&this);
             tokio::spawn(
                 async move {
-                    LOGGER.info(format!("[{MAGENTA}{addr}{RESET}] Incoming connection"));
+                    if OPTIONS.server_options.verbose_logging {
+                        LOGGER.info(format!("[{MAGENTA}{addr}{RESET}] Incoming connection"));
+                    }
 
-                    if let Err(err) = this.handle_connection(stream).await {
+                    if let Err(err) = this.handle_connection(stream, &addr).await {
                         LOGGER.warning(format!("[{MAGENTA}{addr}{RESET}] Connection exited with error {err}"));
-                    } else {
+                    } else if OPTIONS.server_options.verbose_logging {
                         LOGGER.info(format!("[{MAGENTA}{addr}{RESET}] Connection exited"));
                     }
                 }
@@ -181,7 +184,7 @@ impl Server {
         }
     }
 
-    async fn handle_connection(&self, stream: TcpStream) -> Result<()> {
+    async fn handle_connection(&self, stream: TcpStream, addr: &SocketAddr) -> Result<()> {
         let mut stream = Delimited::new(stream);
         if let Some(auth) = &self.auth {
             if let Err(err) = auth.server_handshake(&mut stream).await {
@@ -201,15 +204,21 @@ impl Server {
                     if let Some(mut id) = id.clone() {
                         let (username, token) = id.clone().unwrap();
 
-                        LOGGER.info(format!(" ↳ Received Strawberry ID Auth (@{})", username));
+                        if OPTIONS.server_options.verbose_logging {
+                            LOGGER.info(format!("[{MAGENTA}{addr}{RESET}] Received Strawberry ID Auth (@{username})"));
+                        }
 
                         let auth = id.verify(&username, &token).await?;
 
                         if let Some(auth) = auth.clone() {
-                            LOGGER.info(format!(" ↳ Authentication successful ({} (@{}))", auth.strawberry_id.full_name, auth.strawberry_id.username));
+                            if OPTIONS.server_options.verbose_logging {
+                                LOGGER.info(format!("[{MAGENTA}{addr}{RESET}] Authentication successful ({} (@{}))", auth.strawberry_id.full_name, auth.strawberry_id.username));
+                            }
 
                         } else {
-                            LOGGER.info(format!(" ↳ {YELLOW}{BOLD}!{C_RESET} Invalid Strawberry ID Auth (@{username})"));
+                            if OPTIONS.server_options.verbose_logging {
+                                LOGGER.info(format!("[{MAGENTA}{addr}{RESET}] {YELLOW}{BOLD}<!>{C_RESET} Invalid Strawberry ID Auth (@{username})"));
+                            }
                             stream.send(ServerMessage::Error("Invalid Strawberry ID".to_string())).await?;
                             
                             return Ok(())
@@ -217,7 +226,10 @@ impl Server {
                         
                         auth
                     } else {
-                        LOGGER.info(format!(" ↳ {YELLOW}{BOLD}!{C_RESET} Invalid Strawberry ID Auth (Client connected without Strawberry ID)"));
+                        if OPTIONS.server_options.verbose_logging {
+                            LOGGER.info(format!("[{MAGENTA}{addr}{RESET}] {YELLOW}{BOLD}<!>{C_RESET} Invalid Strawberry ID Auth (Client connected without Strawberry ID)"));
+                        }
+
                         stream.send(ServerMessage::Error(
                             "This server requires a Strawberry ID which you didn't provide. \
                             Please add the --auth Flag (and if not already done, log in with your Strawberry ID with tunneled auth)".to_string()
@@ -239,7 +251,10 @@ impl Server {
 
                 let port = listener.local_addr()?.port();
 
-                LOGGER.info(format!(" ↳ New client listening at port {port}"));
+                LOGGER.info(format!(
+                    "[{MAGENTA}{}{C_RESET}] Created tunneling rule for {BLUE}{BOLD}{}{C_RESET}->{MAGENTA}{BOLD}{}:{port}{C_RESET}",
+                    addr, addr.ip(), listener.local_addr()?.ip()
+                ));
 
                 stream.send(ServerMessage::Hello(port)).await?;
 
