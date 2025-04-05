@@ -4,7 +4,6 @@
 use std::{io, net::SocketAddr, ops::RangeInclusive, sync::Arc, time::Duration};
 use std::fs::File;
 use std::io::Read;
-
 use tokio::io::AsyncWriteExt;
 use tokio::net::{TcpListener, TcpStream};
 use tokio::time::{sleep, timeout};
@@ -118,9 +117,21 @@ impl Server {
         LOGGER_2.default(format!("Starting Tunneled server v{}", *VERSION));
         LOGGER.info(format!("Server is listening on {MAGENTA}{addr}{C_RESET}"));
 
+        if OPTIONS.server_options.verbose_logging {
+            LOGGER.info(format!("Port range: {MAGENTA}{}-{}{C_RESET}", this.port_range.start(), this.port_range.end()));
+            LOGGER.info(format!("Control port: {MAGENTA}{}{C_RESET}", this.control_port));
+        }
+
         if this.require_id {
             LOGGER_2.info(format!("Using Strawberry ID Authentication ({STRAWBERRY_ID_API})"));
         }
+        else if this.auth.is_some() {
+            LOGGER_2.info("Using secret authentication");
+        }
+        else {
+            LOGGER_2.info("No authentication");
+        }
+
 
         loop {
             let (stream, addr) = listener.accept().await?;
@@ -135,7 +146,7 @@ impl Server {
                         LOGGER.warning(format!("[{MAGENTA}{addr}{RESET}] Connection exited with error {err}"));
                     } else if OPTIONS.server_options.verbose_logging {
                         LOGGER.info(format!("[{MAGENTA}{addr}{RESET}] Connection exited"));
-                    }
+                    }   
                 }
                 .instrument(info_span!("control", ?addr)),
             );
