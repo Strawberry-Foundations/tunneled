@@ -65,16 +65,16 @@ async fn main() -> Result <()> {
                     std::process::exit(1)
                 });
 
-                let port_range = config.server.min_port..=config.server.max_port;
+                let port_range = config.server.host.min_port..=config.server.host.max_port;
                 if port_range.is_empty() {
                     eprintln!("{RED}{BOLD} ! {RESET} Port range is empty{C_RESET}");
                 }
                 Server::new(
                     port_range,
-                    config.server.secret.as_deref(),
-                    config.server.control_port.unwrap_or(7835),
-                    config.server.require_id.unwrap_or(false),
-                    config.server.whitelist_static_port.unwrap_or_default()
+                    config.server.auth.secret.as_deref(),
+                    config.server.host.control_port.unwrap_or(7835),
+                    config.server.auth.require_id.unwrap_or(false),
+                    config.server.auth.allow_static_port.unwrap_or_default()
                 ).listen().await?;
             }
             else {
