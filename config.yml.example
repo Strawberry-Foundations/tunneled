@@ -1,6 +1,7 @@
 server:
   min-port: 49100
   max-port: 50000
+  control-port: 7385
   require-id: false
   secret: mysecret
 
