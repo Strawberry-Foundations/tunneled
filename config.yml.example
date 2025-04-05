@@ -1,14 +1,12 @@
 server:
-  min-port: 49100
-  max-port: 50000
-  control-port: 7385
-  require-id: false
-  secret: mysecret
+  host:
+    min-port: 49100
+    max-port: 50000
+    control-port: 7385
 
-# Available fields:
-#   min-port: 49100
-#   max-port: 50000
-#   control-port: 7385
-#   require-id: false
-#   secret: mysecret
-#   whitelist-static-port: ["myaddress@example.com"]
+  auth:
+    require-id: false
+    secret: mysecret
+
+  security:
+    ip-blacklist: ["1.2.3.4"]
