@@ -44,18 +44,35 @@ pub struct Server {
 }
 
 #[derive(Debug, Deserialize, Clone)]
-pub struct Config {
+pub struct ServerHostConfig {
     #[serde(rename = "min-port")]
     pub min_port: u16,
     #[serde(rename = "max-port")]
     pub max_port: u16,
     #[serde(rename = "control-port")]
     pub control_port: Option<u16>,
+}
+
+#[derive(Debug, Deserialize, Clone)]
+pub struct ServerAuthConfig {
     pub secret: Option<String>,
     #[serde(rename = "require-id")]
     pub require_id: Option<bool>,
-    #[serde(rename = "whitelist-static-port")]
-    pub whitelist_static_port: Option<Vec<String>>,
+    #[serde(rename = "allow-static-port")]
+    pub allow_static_port: Option<Vec<String>>,
+}
+
+#[derive(Debug, Deserialize, Clone)]
+pub struct ServerSecurityConfig {
+    #[serde(rename = "ip-blacklist")]
+    pub ip_blacklist: Option<Vec<String>>,
+}
+
+#[derive(Debug, Deserialize, Clone)]
+pub struct Config {
+    pub host: ServerHostConfig,
+    pub auth: ServerAuthConfig,
+    pub security: ServerSecurityConfig,
 }
 
 #[derive(Debug, Deserialize, Clone)]
