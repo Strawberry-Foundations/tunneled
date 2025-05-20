@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-stblib = { version = "0.6.3-pre2", features = ["plugin"]}
+stblib = { version = "0.7.0", features = ["plugin"]}
 
 [lib]
 crate-type = ["cdylib"]
