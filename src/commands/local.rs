@@ -62,10 +62,7 @@ impl Client {
         }
 
         let id = if require_auth {
-            match StrawberryIdAuthenticator::fetch() {
-                Ok(id) => Some(id),
-                Err(_) => None
-            }
+            StrawberryIdAuthenticator::fetch().ok()
         }
         else {
             None
