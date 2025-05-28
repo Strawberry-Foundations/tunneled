@@ -17,7 +17,7 @@ pub fn about() {
 |     {BLUE}github.com/ekzhang/bore{C_RESET}    |
 * ------------------------------ *
 
-* ----------- {BOLD}{YELLOW}WARNING{C_RESET}{BOLD} ---------- *
+* ----------- {BOLD}{YELLOW}WARNING{C_RESET}{BOLD}{WHITE} ---------- *
 |    This program comes with     |
 |     absolutely {RED}{UNDERLINE}NO{C_RESET}{WHITE}{BOLD} warranty     |
 |                                |
