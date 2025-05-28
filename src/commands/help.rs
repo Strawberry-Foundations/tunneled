@@ -9,6 +9,7 @@ pub fn help() {
     {CYAN}{BOLD}help:{C_RESET} Prints this message
     {CYAN}{BOLD}about:{C_RESET} About Strawberry Tunneled
     {CYAN}{BOLD}auth:{C_RESET} Authenticate with your Strawberry ID
+    {CYAN}{BOLD}plugin:{C_RESET} Manage plugins for Strawberry Tunneled
 
     {CYAN}{BOLD}local <port>:{C_RESET} Starts a local proxy to the remote server
      {BOLD}↳ {MAGENTA}Options:{C_RESET}

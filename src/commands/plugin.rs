@@ -2,9 +2,10 @@
 
 use std::{env, fs};
 use libloading::{Library, Symbol};
-use stblib::colors::{C_RESET, RED, BOLD, RESET, CYAN, GREEN};
+use stblib::colors::{C_RESET, RED, BOLD, RESET, CYAN, GREEN, UNDERLINE, WHITE, MAGENTA};
 use stblib::external::plugin::{Plugin, PluginProperties};
 use thiserror::Error;
+use crate::constants::VERSION;
 
 type PluginCreate = unsafe extern "C" fn() -> (Box<dyn Plugin>, PluginProperties);
 
@@ -20,6 +21,20 @@ pub enum PluginError {
     LoadError(String),
     #[error("Failed to load symbol\n   -> \x1b[90m{0}\x1b[0m")]
     SymbolError(String),
+}
+
+
+pub fn help() {
+    println!("\
+{BOLD}{CYAN}{UNDERLINE}Strawberry Tunneled v{} [PLUGIN]{C_RESET}\n\
+{GREEN}{BOLD}Usage:{RESET} {WHITE}tunneled plugin {CYAN}[command] {RED}[<options>]{C_RESET}\n\n\
+{MAGENTA}{BOLD}Commands:{C_RESET}
+    {CYAN}{BOLD}list:{C_RESET} Lists all available plugins
+    {CYAN}{BOLD}help:{C_RESET} Prints this message
+
+    {CYAN}{BOLD}<plugin-id> [<options>]:{C_RESET} Run a plugin by its ID
+", *VERSION);
+    std::process::exit(0);
 }
 
 pub fn load_plugin(path: &str) -> Result<LoadedPlugin, PluginError> {
@@ -113,6 +128,11 @@ pub fn list() -> anyhow::Result<()> {
 pub fn plugin() -> anyhow::Result<()> {
     let args: Vec<String> = env::args().skip(2).collect();
     let plugins = get_plugins()?;
+
+    if args.is_empty() {
+        help();
+        return Ok(());
+    }
     
     match args.first().unwrap_or_else(|| std::process::exit(1)).as_str() {
         "list" => {
