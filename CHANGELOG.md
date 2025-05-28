@@ -1,3 +1,4 @@
+# Changelog for next-gen Tunneled (v2.5.0)
 - Added plugin subsystem
 - Optimized arg parser
 - Improved logging
