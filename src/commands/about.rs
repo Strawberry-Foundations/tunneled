@@ -10,7 +10,7 @@ pub fn about() {
 * ------------------------------ *
 
 * ------------------------------ *
-|    Copyright (C) 2022 - 2024   |
+|    Copyright (C) 2022 - 2025   |
 |     Strawberry Foundations     |
 |                                |
 | Made possible with the help of |
