@@ -1,6 +1,6 @@
 <div align="center">
     <h1>🕳️ Tunneled</h1>
-    <p><em>A simple and powerful CLI tool for creating secure TCP tunnels</em></p>
+    <p><em>A simple and powerful CLI tool for creating TCP tunnels</em></p>
     
 [![License: MIT](https://img.shields.io/badge/License-GPL--3.0-yellow.svg)](https://opensource.org/licenses/GPL)
 [![Rust](https://img.shields.io/badge/Rust-orange.svg?style=flat&logo=rust&logoColor=white)](https://www.rust-lang.org/)
