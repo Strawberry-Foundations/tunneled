@@ -1,6 +1,7 @@
-- Removed `.unwraps()` and implemented correct error handling
-- General improvements
-- Update dependencies
-- Fixed critical issue with compose command -> Providing a file that is not named `services.yml` didn't worked
-- Better terminal color formatting
-- Strawberry ID improvements
+- Added plugin subsystem
+- Optimized arg parser
+- Improved logging
+- Added verbose mode for client
+- Updated compose configuration
+- Fixed color issues and copyright year
+- Added support for changing the IP address where the tunnels will listen
