@@ -74,7 +74,8 @@ async fn main() -> Result <()> {
                     config.server.auth.secret.as_deref(),
                     config.server.host.control_port.unwrap_or(7835),
                     config.server.auth.require_id.unwrap_or(false),
-                    config.server.auth.allow_static_port.unwrap_or_default()
+                    config.server.auth.allow_static_port.unwrap_or_default(),
+                    config.server.host.tunnels_addr.as_deref().unwrap_or("0.0.0.0").to_string(),
                 ).listen().await?;
             }
             else {
@@ -89,6 +90,7 @@ async fn main() -> Result <()> {
                     OPTIONS.server_options.control_port,
                     OPTIONS.server_options.require_id,
                     Vec::new(),
+                    OPTIONS.server_options.tunnels_addr.clone()
                 ).listen().await?;
             }
 

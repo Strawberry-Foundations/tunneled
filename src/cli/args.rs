@@ -22,6 +22,7 @@ pub struct ServerOptions {
     pub control_port: u16,
     pub config_file: Option<String>,
     pub verbose_logging: bool,
+    pub tunnels_addr: String
 }
 
 #[derive(Default)]
@@ -84,6 +85,7 @@ impl Args {
                 min_port: 1024,
                 max_port: 65535,
                 control_port: 7835,
+                tunnels_addr: "0.0.0.0".to_string(),
                 ..Default::default()
             },
             client_options: ClientOptions {
@@ -142,6 +144,7 @@ impl Args {
                     options.client_options.verbose_logging = true;
                 },
                 "-id" | "--require-id" => options.server_options.require_id = true,
+                "-t" | "--tunnels-addr" => parse_string(iter.next(), &mut options.server_options.tunnels_addr, "tunnels address"),
                 other => {
                     if let Ok(port) = other.parse::<u16>() {
                         options.client_options.port = port;

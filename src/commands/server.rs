@@ -39,7 +39,10 @@ pub struct Server {
     require_id: bool,
 
     /// Whitelist for static port users
-    whitelist_static_port: Vec<String>
+    whitelist_static_port: Vec<String>,
+
+    /// IP address where the tunneles will listen on
+    tunnels_addr: String
 }
 
 #[derive(Debug, Deserialize, Clone)]
@@ -50,6 +53,8 @@ pub struct ServerHostConfig {
     pub max_port: u16,
     #[serde(rename = "control-port")]
     pub control_port: Option<u16>,
+    #[serde(rename = "tunnels-addr")]
+    pub tunnels_addr: Option<String>
 }
 
 #[derive(Debug, Deserialize, Clone)]
@@ -96,7 +101,14 @@ pub fn read_config_file(file_path: &str) -> Result<ServerConfig, Box<dyn std::er
 
 impl Server {
     /// Create a new server with a specified minimum port number.
-    pub fn new(port_range: RangeInclusive<u16>, secret: Option<&str>, control_port: u16, require_id: bool, whitelist: Vec<String>) -> Self {
+    pub fn new(
+        port_range: RangeInclusive<u16>,
+        secret: Option<&str>,
+        control_port: u16,
+        require_id: bool,
+        whitelist: Vec<String>,
+        tunnels_addr: String,
+    ) -> Self {
         assert!(!port_range.is_empty(), "must provide at least one port");
         Server {
             port_range,
@@ -104,7 +116,8 @@ impl Server {
             auth: secret.map(Authenticator::new),
             control_port,
             require_id,
-            whitelist_static_port: whitelist
+            whitelist_static_port: whitelist,
+            tunnels_addr
         }
     }
 
@@ -116,6 +129,8 @@ impl Server {
 
         LOGGER_2.default(format!("Starting Tunneled server v{}", *VERSION));
         LOGGER.info(format!("Server is listening on {MAGENTA}{addr}{C_RESET}"));
+        LOGGER.info(format!("Port range: {MAGENTA}{}-{}{C_RESET}", this.port_range.start(), this.port_range.end()));
+        LOGGER.info(format!("Tunneling address: {MAGENTA}{}{C_RESET}", this.tunnels_addr));
 
         if OPTIONS.server_options.verbose_logging {
             LOGGER.info(format!("Port range: {MAGENTA}{}-{}{C_RESET}", this.port_range.start(), this.port_range.end()));
@@ -156,12 +171,12 @@ impl Server {
     #[allow(unused_assignments)]
     async fn create_listener(&self, port: u16, static_port: Option<u16>, id: &Option<ClientAuthentication>) -> Result<TcpListener, &'static str> {
         let try_bind = |port: u16| async move {
-            TcpListener::bind(("0.0.0.0", port))
+            TcpListener::bind((self.tunnels_addr.as_ref(), port))
                 .await
                 .map_err(|err| match err.kind() {
-                    io::ErrorKind::AddrInUse => "port already in use",
-                    io::ErrorKind::PermissionDenied => "permission denied",
-                    _ => "failed to bind to port",
+                    io::ErrorKind::AddrInUse => "Port already in use",
+                    io::ErrorKind::PermissionDenied => "Permission denied",
+                    _ => "Failed to bind to port",
                 })
         };
 
