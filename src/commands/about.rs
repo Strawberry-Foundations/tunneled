@@ -9,13 +9,13 @@ pub fn about() {
 |  for making local tcp tunnels  |
 * ------------------------------ *
 
-* ------------------------------ *
-|    Copyright (C) 2022 - 2025   |
-|     Strawberry Foundations     |
-|                                |
-| Made possible with the help of |
-|     {BLUE}github.com/ekzhang/bore{C_RESET}    |
-* ------------------------------ *
+* ------------------------------- *
+|    Copyright (C) 2022 - 2025    |
+|     Strawberry Foundations      |
+|                                 |
+| Made possible with the help of  |
+| {BLUE}https://github.com/ekzhang/bore{C_RESET} |
+* ------------------------------- *
 
 * ----------- {BOLD}{YELLOW}WARNING{C_RESET}{BOLD}{WHITE} ---------- *
 |    This program comes with     |
