@@ -122,7 +122,7 @@ pub fn plugin() -> anyhow::Result<()> {
             Ok(())
         },
         &_ => {
-            let plugin_id = args.get(0).expect("No plugin ID provided");
+            let plugin_id = args.first().expect("No plugin ID provided");
             if let Some(loaded) = plugins.iter().find(|p| p.properties.id == *plugin_id) {
                 loaded.plugin.execute(&args[1..]);
             } else {
