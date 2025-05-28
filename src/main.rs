@@ -95,7 +95,7 @@ async fn main() -> Result <()> {
         }
         Command::Auth => auth(Auth::strawberry_id()).await?,
         Command::About => commands::about::about(),
-        Command::Plugin => commands::plugin::plugin(),
+        Command::Plugin => commands::plugin::plugin()?,
         Command::None => commands::help::help(),
     }
 

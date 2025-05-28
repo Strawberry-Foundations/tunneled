@@ -1,6 +1,8 @@
 #![allow(improper_ctypes_definitions)]
+
+use std::{env, fs};
 use libloading::{Library, Symbol};
-use stblib::colors::{C_RESET, RED};
+use stblib::colors::{C_RESET, RED, BOLD, RESET, CYAN, GREEN};
 use stblib::external::plugin::{Plugin, PluginProperties};
 use thiserror::Error;
 
@@ -37,13 +39,96 @@ pub fn load_plugin(path: &str) -> Result<LoadedPlugin, PluginError> {
     })
 }
 
-pub fn plugin() {
-    let loaded = match load_plugin("plugins/example_plugin/target/debug/libexample_plugin.so") {
-        Ok(plugin) => plugin,
-        Err(err) => {
-            eprintln!(" {RED}!{C_RESET} Plugin Error: {}", err);
-            return;
+pub fn get_plugins() -> anyhow::Result<Box<Vec<LoadedPlugin>>> {
+    let mut plugins = Vec::new();
+    
+    let plugin_directory = if let Some(home_dir) = dirs::home_dir() {
+        let plugin_dir = home_dir.join(".config").join("tunneled").join("plugins");
+
+        if plugin_dir.exists() {
+            plugin_dir
+        } else {
+            fs::create_dir_all(&plugin_dir).expect("Failed to create plugin directory");
+            return Err(anyhow::anyhow!(
+                "{}{}Error while fetching plugin directory:{} Plugin directory does not exist. Please run `tunneled plugin install` to install plugins.{}",
+                RED, BOLD, RESET, C_RESET
+            ));
         }
+    } else {
+        anyhow::bail!(
+            "{}{}Error while fetching plugin directory:{} Home directory not found.{}",
+            RED, BOLD, RESET, C_RESET
+        );
     };
-    loaded.plugin.execute(&["test".to_string()]);
+
+    match fs::read_dir(plugin_directory) {
+        Ok(entries) => {
+            for entry in entries {
+                match entry {
+                    Ok(entry) => {
+                        let path = entry.path();
+                        if !path.is_dir() {
+                            let loaded = match load_plugin(&path.to_string_lossy()) {
+                                Ok(plugin) => plugin,
+                                Err(err) => {
+                                    eprintln!(" {RED}!{C_RESET} Plugin Error: {}", err);
+                                    return Err(anyhow::anyhow!(""))
+                                }
+                            };
+                            
+                            plugins.push(loaded);
+                        }
+                        
+                    }
+                    Err(e) => println!("{e}"),
+                }
+            }
+        }
+        Err(e) => println!("{e}"),
+    }
+
+    Ok(Box::new(plugins))
+}
+
+
+pub fn list() -> anyhow::Result<()> {
+    let plugins = get_plugins()?;
+    
+    if plugins.is_empty() {
+        println!("{}{}No plugins found. Please run `tunneled plugin install` to install plugins.{}", RED, BOLD, C_RESET);
+        return Ok(());
+    }
+    
+    for plugin in plugins.iter() {
+        println!("{BOLD}* {CYAN}{} ({}){C_RESET}", plugin.properties.name, plugin.properties.id);
+        println!("   - Name: {GREEN}{BOLD}{}{C_RESET}", plugin.properties.name);
+        println!("   - Version: {GREEN}{BOLD}{}{C_RESET}", plugin.properties.version);
+        println!("   - Package ID: {GREEN}{BOLD}{}{C_RESET}", plugin.properties.package_id);
+        println!("   - Library version: {GREEN}{BOLD}{}{C_RESET}", plugin.properties.library_version);
+    }
+    
+    Ok(())
+}
+
+pub fn plugin() -> anyhow::Result<()> {
+    let args: Vec<String> = env::args().skip(2).collect();
+    let plugins = get_plugins()?;
+    
+    match args.first().unwrap_or_else(|| std::process::exit(1)).as_str() {
+        "list" => {
+            if let Err(e) = list() {
+                eprintln!("{}{}Error while listing plugins:{} {e}{}", RED, BOLD, RESET, C_RESET);
+            }
+            Ok(())
+        },
+        &_ => {
+            let plugin_id = args.get(0).expect("No plugin ID provided");
+            if let Some(loaded) = plugins.iter().find(|p| p.properties.id == *plugin_id) {
+                loaded.plugin.execute(&args[1..]);
+            } else {
+                eprintln!("{}{}Plugin with id '{}' not found.{}", RED, BOLD, plugin_id, C_RESET);
+            }
+            Ok(())
+        }
+    }
 }
