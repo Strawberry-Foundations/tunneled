@@ -1,16 +1,35 @@
 use stblib::external::plugin::{Plugin, PluginProperties};
 
-pub fn add(left: u64, right: u64) -> u64 {
-    left + right
+pub struct ExamplePlugin;
+
+impl Plugin for ExamplePlugin {
+    fn execute(&self, args: &[String]) {
+        match args.first().unwrap().as_str() {
+            "test" => {
+                println!("Example tunneled plugin")
+            },
+            "foo" => {
+                println!("Bar!")
+            }
+            _ => self.help()
+        }
+    }
+
+    fn help(&self) {
+        println!("Example help message")
+    }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+#[allow(improper_ctypes_definitions)]
+#[no_mangle]
+pub extern "C" fn create_plugin() -> (Box<dyn Plugin>, PluginProperties) {
+    let properties: PluginProperties = PluginProperties {
+        name: "Example Plugin",
+        id: "example-plugin",
+        package_id: "com.example.exampleplugin",
+        version: env!("CARGO_PKG_VERSION"),
+        library_version: stblib::VERSION,
+    };
 
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
+    (Box::new(ExamplePlugin), properties)
 }
