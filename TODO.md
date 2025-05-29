@@ -1,0 +1,2 @@
+- Interactive TUI
+- HTTP / SSH / WebSocket tunneling (plugin)
