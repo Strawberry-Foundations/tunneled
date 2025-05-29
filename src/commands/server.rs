@@ -12,7 +12,7 @@ use anyhow::Result;
 use dashmap::DashMap;
 use serde::Deserialize;
 use stblib::colors::{BOLD, C_RESET, CYAN, MAGENTA, RED, RESET, YELLOW, BLUE, GREEN, ITALIC};
-use tracing::{info, info_span, Instrument};
+use tracing::{info_span, Instrument};
 use uuid::Uuid;
 
 use crate::auth::authenticator::{ClientAuthentication};
@@ -327,7 +327,10 @@ impl Server {
                 }
             }
             Some(ClientMessage::Accept(id)) => {
-                info!(%id, "Forwarding connection");
+                if OPTIONS.server_options.verbose_logging{
+                    LOGGER.info(format!("Forwarding connection {id}"));
+                }
+                
                 match self.connections.remove(&id) {
                     Some((_, mut stream2)) => {
                         let parts = stream.into_parts();
