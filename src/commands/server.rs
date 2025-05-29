@@ -296,7 +296,7 @@ impl Server {
                     addr, addr.ip(), listener.local_addr()?.ip()
                 ));
 
-                stream.send(ServerMessage::Hello(port)).await?;
+                stream.send(ServerMessage::Hello(listener.local_addr()?.ip().to_string(), port)).await?;
 
                 loop {
                     if stream.send(ServerMessage::Heartbeat).await.is_err() {
@@ -330,7 +330,7 @@ impl Server {
                 if OPTIONS.server_options.verbose_logging{
                     LOGGER.info(format!("Forwarding connection {id}"));
                 }
-                
+
                 match self.connections.remove(&id) {
                     Some((_, mut stream2)) => {
                         let parts = stream.into_parts();

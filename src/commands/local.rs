@@ -70,8 +70,8 @@ impl Client {
 
         stream.send(ClientMessage::Hello(0, id, static_port)).await?;
 
-        let remote_port = match stream.recv_timeout().await? {
-            Some(ServerMessage::Hello(remote_port)) => remote_port,
+        let (addr, remote_port) = match stream.recv_timeout().await? {
+            Some(ServerMessage::Hello(addr, remote_port)) => (addr, remote_port),
             Some(ServerMessage::Error(message)) => bail!("Server Error: {message}"),
             Some(ServerMessage::Challenge(_)) => bail!("Server Error: Server requires authentication, but no client secret was provided"),
             Some(_) => bail!("Server Error: unexpected initial non-hello message"),
@@ -92,7 +92,7 @@ impl Client {
         }
 
         LOGGER.info(format!("Connected to server {MAGENTA}{ITALIC}{server}{C_RESET}"));
-        LOGGER.info(format!("Listening at {BLUE}{server}:{remote_port}{RESET}"));
+        LOGGER.info(format!("Listening at {BLUE}{addr}:{remote_port}{RESET}"));
 
         if service.is_some() {
             println!()
@@ -115,7 +115,7 @@ impl Client {
         let this = Arc::new(self);
         loop {
             match conn.recv().await? {
-                Some(ServerMessage::Hello(_)) => LOGGER.warning("Unexpected hello"),
+                Some(ServerMessage::Hello(_, _)) => LOGGER.warning("Unexpected hello"),
                 Some(ServerMessage::Challenge(_)) => LOGGER.warning("Unexpected challenge"),
                 Some(ServerMessage::Heartbeat) => (),
                 Some(ServerMessage::Connection(id)) => {

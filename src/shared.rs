@@ -40,7 +40,7 @@ pub enum ServerMessage {
     Challenge(Uuid),
 
     /// Response to a client's initial message, with actual public port.
-    Hello(u16),
+    Hello(String, u16),
 
     /// No-op used to test if the client is still reachable.
     Heartbeat,
