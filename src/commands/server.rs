@@ -15,11 +15,11 @@ use stblib::colors::{BOLD, C_RESET, CYAN, MAGENTA, RED, RESET, YELLOW, BLUE, GRE
 use tracing::{info_span, Instrument};
 use uuid::Uuid;
 
-use crate::auth::authenticator::{ClientAuthentication};
-use crate::auth::secret::Authenticator;
+use crate::core::auth::authenticator::{ClientAuthentication};
+use crate::core::auth::secret::Authenticator;
 use crate::cli::OPTIONS;
-use crate::shared::{proxy, ClientMessage, Delimited, ServerMessage};
-use crate::constants::{LOGGER, LOGGER_2, STRAWBERRY_ID_API, VERSION};
+use crate::core::shared::{proxy, ClientMessage, Delimited, ServerMessage};
+use crate::core::constants::{LOGGER, LOGGER_2, STRAWBERRY_ID_API, VERSION};
 
 /// State structure for the server.
 pub struct Server {

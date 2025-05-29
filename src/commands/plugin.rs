@@ -5,7 +5,7 @@ use libloading::{Library, Symbol};
 use stblib::colors::{C_RESET, RED, BOLD, RESET, CYAN, GREEN, UNDERLINE, WHITE, MAGENTA};
 use stblib::external::plugin::{Plugin, PluginProperties};
 use thiserror::Error;
-use crate::constants::VERSION;
+use crate::core::constants::VERSION;
 
 type PluginCreate = unsafe extern "C" fn() -> (Box<dyn Plugin>, PluginProperties);
 

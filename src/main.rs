@@ -19,15 +19,13 @@ use crate::commands::server::{read_config_file, Server};
 use crate::commands::compose::compose;
 use crate::commands::auth::auth;
 
-use crate::auth::Auth;
+use core::auth::Auth;
 use crate::cli::{ARGS, OPTIONS};
 use crate::cli::args::Command;
 
 pub mod cli;
 pub mod commands;
-pub mod constants;
-pub mod auth;
-pub mod shared;
+mod core;
 
 #[tokio::main]
 async fn main() -> Result <()> {

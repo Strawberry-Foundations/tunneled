@@ -9,12 +9,12 @@ use tokio::{io::AsyncWriteExt, net::TcpStream, time::timeout};
 use tracing::{info_span, Instrument};
 use uuid::Uuid;
 
-use crate::auth::authenticator::StrawberryIdAuthenticator;
-use crate::auth::secret::Authenticator;
+use crate::core::auth::authenticator::StrawberryIdAuthenticator;
+use crate::core::auth::secret::Authenticator;
 use crate::cli::OPTIONS;
-use crate::shared::{proxy, ClientMessage, Delimited, ServerMessage, NETWORK_TIMEOUT};
+use crate::core::shared::{proxy, ClientMessage, Delimited, ServerMessage, NETWORK_TIMEOUT};
 use crate::commands::compose::Service;
-use crate::constants::{LOGGER, LOGGER_2};
+use crate::core::constants::{LOGGER, LOGGER_2};
 
 /// State structure for the client.
 pub struct Client {

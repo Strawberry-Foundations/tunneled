@@ -1,5 +1,5 @@
 use stblib::colors::{C_RESET, GREEN, BOLD, UNDERLINE, CYAN, RESET, WHITE, RED, MAGENTA};
-use crate::constants::VERSION;
+use crate::core::constants::VERSION;
 
 pub fn help() {
     println!("\

@@ -1,4 +1,4 @@
-use crate::auth::strawberry_id::StrawberryId;
+use crate::core::auth::strawberry_id::StrawberryId;
 
 pub mod strawberry_id;
 pub mod authenticator;

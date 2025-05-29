@@ -7,7 +7,7 @@ use sha2::{Digest, Sha256};
 use tokio::io::{AsyncRead, AsyncWrite};
 use uuid::Uuid;
 
-use crate::shared::{ClientMessage, Delimited, ServerMessage};
+use crate::core::shared::{ClientMessage, Delimited, ServerMessage};
 
 /// Wrapper around a MAC used for authenticating clients that have a secret.
 pub struct Authenticator(Hmac<Sha256>);
