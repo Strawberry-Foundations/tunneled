@@ -12,7 +12,7 @@ use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use tracing::trace;
 use uuid::Uuid;
 
-use crate::auth::authenticator::StrawberryIdAuthenticator;
+use crate::core::auth::authenticator::StrawberryIdAuthenticator;
 
 /// Maximum byte length for a JSON frame in the stream.
 pub const MAX_FRAME_LENGTH: usize = 256;
