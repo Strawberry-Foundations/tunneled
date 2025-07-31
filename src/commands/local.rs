@@ -3,18 +3,18 @@
 
 use std::sync::Arc;
 
-use anyhow::{bail, Context, Result};
-use stblib::colors::{BOLD, C_RESET, CYAN, RED, RESET, BLUE, ITALIC, MAGENTA, GRAY};
+use anyhow::{Context, Result, bail};
+use libstrawberry::colors::{BLUE, BOLD, C_RESET, CYAN, GRAY, ITALIC, MAGENTA, RED, RESET};
 use tokio::{io::AsyncWriteExt, net::TcpStream, time::timeout};
-use tracing::{info_span, Instrument};
+use tracing::{Instrument, info_span};
 use uuid::Uuid;
 
+use crate::cli::OPTIONS;
+use crate::commands::compose::Service;
 use crate::core::auth::authenticator::StrawberryIdAuthenticator;
 use crate::core::auth::secret::Authenticator;
-use crate::cli::OPTIONS;
-use crate::core::shared::{proxy, ClientMessage, Delimited, ServerMessage, NETWORK_TIMEOUT};
-use crate::commands::compose::Service;
 use crate::core::constants::{LOGGER, LOGGER_2};
+use crate::core::shared::{ClientMessage, Delimited, NETWORK_TIMEOUT, ServerMessage};
 
 /// State structure for the client.
 pub struct Client {
@@ -29,13 +29,12 @@ pub struct Client {
 
     /// Local port that is forwarded.
     local_port: u16,
-    
+
     /// Tcp connection port for remote server
     control_port: u16,
 
     /// Optional secret used to authenticate clients.
     auth: Option<Authenticator>,
-    
 }
 
 impl Client {
@@ -48,12 +47,16 @@ impl Client {
         static_port: Option<u16>,
         control_port: u16,
         require_auth: bool,
-        service: Option<&Service>
+        service: Option<&Service>,
     ) -> Result<Self> {
-        let mut stream = Delimited::new(connect_with_timeout(server, control_port).await.unwrap_or_else(|err| {
-            eprintln!(" {RED}{BOLD}!{C_RESET}  Server Error: {err}");
-            std::process::exit(1)
-        }));
+        let mut stream = Delimited::new(
+            connect_with_timeout(server, control_port)
+                .await
+                .unwrap_or_else(|err| {
+                    eprintln!(" {RED}{BOLD}!{C_RESET}  Server Error: {err}");
+                    std::process::exit(1)
+                }),
+        );
 
         let auth = secret.map(Authenticator::new);
 
@@ -63,35 +66,45 @@ impl Client {
 
         let id = if require_auth {
             StrawberryIdAuthenticator::fetch().ok()
-        }
-        else {
+        } else {
             None
         };
 
-        stream.send(ClientMessage::Hello(0, id, static_port)).await?;
+        stream
+            .send(ClientMessage::Hello(0, id, static_port))
+            .await?;
 
         let (addr, remote_port) = match stream.recv_timeout().await? {
             Some(ServerMessage::Hello(addr, remote_port)) => (addr, remote_port),
             Some(ServerMessage::Error(message)) => bail!("Server Error: {message}"),
-            Some(ServerMessage::Challenge(_)) => bail!("Server Error: Server requires authentication, but no client secret was provided"),
+            Some(ServerMessage::Challenge(_)) => bail!(
+                "Server Error: Server requires authentication, but no client secret was provided"
+            ),
             Some(_) => bail!("Server Error: unexpected initial non-hello message"),
             None => bail!("Server Error: unexpected EOF"),
         };
 
         if let Some(service) = service {
-            LOGGER.default(format!("Starting tunneling service '{CYAN}{}{RESET}'", service.name));
-            LOGGER.info(format!("Forwarding rule: {BLUE}{host}:{port}{RESET}->{ITALIC}{MAGENTA}{server}{RESET}"));
+            LOGGER.ok(format!(
+                "Starting tunneling service '{CYAN}{}{RESET}'",
+                service.name
+            ));
+            LOGGER.info(format!(
+                "Forwarding rule: {BLUE}{host}:{port}{RESET}->{ITALIC}{MAGENTA}{server}{RESET}"
+            ));
         }
 
         if service.is_none() {
-            LOGGER.default(format!("Starting tunneling for {BLUE}{host}:{port}{RESET}->{ITALIC}{MAGENTA}{server}{RESET}"));
+            LOGGER.ok(format!("Starting tunneling for {BLUE}{host}:{port}{RESET}->{ITALIC}{MAGENTA}{server}{RESET}"));
         }
 
         if require_auth {
             LOGGER_2.info("Using Strawberry ID Authentication");
         }
 
-        LOGGER.info(format!("Connected to server {MAGENTA}{ITALIC}{server}{C_RESET}"));
+        LOGGER.info(format!(
+            "Connected to server {MAGENTA}{ITALIC}{server}{C_RESET}"
+        ));
         LOGGER.info(format!("Listening at {BLUE}{addr}:{remote_port}{RESET}"));
 
         if service.is_some() {
@@ -146,7 +159,8 @@ impl Client {
     }
 
     async fn handle_connection(&self, id: Uuid, control_port: u16) -> Result<()> {
-        let mut remote_conn = Delimited::new(connect_with_timeout(&self.to[..], control_port).await?);
+        let mut remote_conn =
+            Delimited::new(connect_with_timeout(&self.to[..], control_port).await?);
 
         if let Some(auth) = &self.auth {
             auth.client_handshake(&mut remote_conn).await?;
@@ -154,11 +168,11 @@ impl Client {
 
         remote_conn.send(ClientMessage::Accept(id)).await?;
         let mut local_conn = connect_with_timeout(&self.local_host, self.local_port).await?;
-        let parts = remote_conn.into_parts();
+        let mut parts = remote_conn.into_parts();
 
         debug_assert!(parts.write_buf.is_empty(), "framed write buffer not empty");
         local_conn.write_all(&parts.read_buf).await?; // mostly of the cases, this will be empty
-        proxy(local_conn, parts.io).await?;
+        tokio::io::copy_bidirectional(&mut local_conn, &mut parts.io).await?;
         Ok(())
     }
 }
