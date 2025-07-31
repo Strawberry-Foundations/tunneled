@@ -1,14 +1,13 @@
 //! Shared data structures, utilities, and protocol definitions.
 
-use std::time::Duration;
-
-use tokio::io::{self, AsyncRead, AsyncWrite};
-use tokio::time::timeout;
-use tokio_util::codec::{AnyDelimiterCodec, Framed, FramedParts};
-
 use anyhow::{Context, Result};
 use futures_util::{SinkExt, StreamExt};
-use serde::{de::DeserializeOwned, Deserialize, Serialize};
+use libstrawberry::colors::{BOLD, C_RESET, RED};
+use serde::{Deserialize, Serialize, de::DeserializeOwned};
+use std::time::Duration;
+use tokio::io::{AsyncRead, AsyncWrite};
+use tokio::time::timeout;
+use tokio_util::codec::{AnyDelimiterCodec, Framed, FramedParts};
 use tracing::trace;
 use uuid::Uuid;
 
@@ -65,13 +64,26 @@ impl<U: AsyncRead + AsyncWrite + Unpin> Delimited<U> {
     /// Read the next null-delimited JSON instruction from a stream.
     pub async fn recv<T: DeserializeOwned>(&mut self) -> Result<Option<T>> {
         trace!("waiting to receive json message");
-        if let Some(next_message) = self.0.next().await {
-            let byte_message = next_message.context("frame error, invalid byte length")?;
-            let serialized_obj =
-                serde_json::from_slice(&byte_message).context("unable to parse message")?;
-            Ok(serialized_obj)
-        } else {
-            Ok(None)
+
+        match self.0.next().await {
+            Some(Ok(byte_message)) => match serde_json::from_slice(&byte_message) {
+                Ok(obj) => Ok(Some(obj)),
+                Err(e) => Err(anyhow::anyhow!(
+                    "Unable to parse message as JSON!\n\
+                    {RED}{BOLD}┌──────────────────────────────────────────┐\n\
+                         │  Maybe you're using an outdated client?  │\n\
+                         └──────────────────────────────────────────┘\n{C_RESET}\
+                         Error  : {error}\n\
+                         Message: {message}\n",
+                    error = e,
+                    message = String::from_utf8_lossy(&byte_message)
+                )),
+            },
+            Some(Err(e)) => Err(anyhow::anyhow!(
+                "Frame error, invalid byte length or IO error: {}",
+                e
+            )),
+            None => Ok(None),
         }
     }
 
@@ -96,19 +108,4 @@ impl<U: AsyncRead + AsyncWrite + Unpin> Delimited<U> {
     pub fn into_parts(self) -> FramedParts<U, AnyDelimiterCodec> {
         self.0.into_parts()
     }
-}
-
-/// Copy data mutually between two read/write streams.
-pub async fn proxy<S1, S2>(stream1: S1, stream2: S2) -> io::Result<()>
-where
-    S1: AsyncRead + AsyncWrite + Unpin,
-    S2: AsyncRead + AsyncWrite + Unpin,
-{
-    let (mut s1_read, mut s1_write) = io::split(stream1);
-    let (mut s2_read, mut s2_write) = io::split(stream2);
-    tokio::select! {
-        res = io::copy(&mut s1_read, &mut s2_write) => res,
-        res = io::copy(&mut s2_read, &mut s1_write) => res,
-    }?;
-    Ok(())
 }
