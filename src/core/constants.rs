@@ -1,6 +1,8 @@
 use lazy_static::lazy_static;
 
 use libstrawberry::colors::{BLUE, BOLD, CYAN, C_RESET, GREEN, RED, YELLOW, GRAY};
+use libstrawberry::logging::features::LoggingFeatures;
+use libstrawberry::logging::formats::LogFormat;
 use libstrawberry::logging::Logger;
 
 pub const STRAWBERRY_ID_API: &str = "https://id.strawberryfoundations.org/v2/";
@@ -9,9 +11,9 @@ pub const STRAWBERRY_ID_API: &str = "https://id.strawberryfoundations.org/v2/";
 lazy_static! {
     pub static ref VERSION: String = env!("CARGO_PKG_VERSION").to_string();
 
-    pub static ref LOGGER: Logger = Logger::new(
-        libstrawberry::logging::features::LoggingFeatures::new(),
-        libstrawberry::logging::formats::LogFormat {
+    pub static ref SERVER_LOG: Logger = Logger::new(
+        LoggingFeatures::new(),
+        LogFormat {
             info: format!("{C_RESET}{BOLD}{GRAY}[%<time>%]{C_RESET} {GREEN}[%<levelname>%]{C_RESET}    [%<message>%]"),
             error: format!("{C_RESET}{BOLD}{GRAY}[%<time>%]{C_RESET} {RED}[%<levelname>%]{C_RESET}   [%<message>%]"),
             ok: format!("{C_RESET}{BOLD}{GRAY}[%<time>%]{C_RESET} {BLUE}INIT{C_RESET}    [%<message>%]"),
@@ -25,9 +27,9 @@ lazy_static! {
         }
     );
 
-    pub static ref LOGGER_2: Logger = Logger::new(
-        libstrawberry::logging::features::LoggingFeatures::new(),
-        libstrawberry::logging::formats::LogFormat {
+    pub static ref CLIENT_LOG: Logger = Logger::new(
+        LoggingFeatures::new(),
+        LogFormat {
             info: format!("{C_RESET}{BOLD}{GRAY}[%<time>%]{C_RESET} {CYAN}AUTH{C_RESET}    [%<message>%]"),
             error: format!("{C_RESET}{BOLD}{GRAY}[%<time>%]{C_RESET} {RED}[%<levelname>%]{C_RESET}   [%<message>%]"),
             ok: format!("{C_RESET}{BOLD}{GRAY}[%<time>%]{C_RESET} {BLUE}INIT{C_RESET}    [%<message>%]"),

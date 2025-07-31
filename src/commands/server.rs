@@ -18,7 +18,7 @@ use uuid::Uuid;
 use crate::cli::OPTIONS;
 use crate::core::auth::authenticator::ClientAuthentication;
 use crate::core::auth::secret::Authenticator;
-use crate::core::constants::{LOGGER, LOGGER_2, STRAWBERRY_ID_API, VERSION};
+use crate::core::constants::{SERVER_LOG, CLIENT_LOG, STRAWBERRY_ID_API, VERSION};
 use crate::core::shared::{ClientMessage, Delimited, ServerMessage};
 
 /// State structure for the server.
@@ -127,38 +127,38 @@ impl Server {
         let addr = SocketAddr::from(([0, 0, 0, 0], this.control_port));
         let listener = TcpListener::bind(&addr).await?;
 
-        LOGGER_2.ok(format!("Starting Tunneled server v{}", *VERSION));
-        LOGGER.info(format!("Server is listening on {MAGENTA}{addr}{C_RESET}"));
-        LOGGER.info(format!(
+        CLIENT_LOG.ok(format!("Starting Tunneled server v{}", *VERSION));
+        SERVER_LOG.info(format!("Server is listening on {MAGENTA}{addr}{C_RESET}"));
+        SERVER_LOG.info(format!(
             "Port range: {MAGENTA}{}-{}{C_RESET}",
             this.port_range.start(),
             this.port_range.end()
         ));
-        LOGGER.info(format!(
+        SERVER_LOG.info(format!(
             "Tunneling address: {MAGENTA}{}{C_RESET}",
             this.tunnels_addr
         ));
 
         if OPTIONS.server_options.verbose_logging {
-            LOGGER.info(format!(
+            SERVER_LOG.info(format!(
                 "Port range: {MAGENTA}{}-{}{C_RESET}",
                 this.port_range.start(),
                 this.port_range.end()
             ));
-            LOGGER.info(format!(
+            SERVER_LOG.info(format!(
                 "Control port: {MAGENTA}{}{C_RESET}",
                 this.control_port
             ));
         }
 
         if this.require_id {
-            LOGGER_2.info(format!(
+            CLIENT_LOG.info(format!(
                 "Using Strawberry ID Authentication ({STRAWBERRY_ID_API})"
             ));
         } else if this.auth.is_some() {
-            LOGGER_2.info("Using secret authentication");
+            CLIENT_LOG.info("Using secret authentication");
         } else {
-            LOGGER_2.info("No authentication");
+            CLIENT_LOG.info("No authentication");
         }
 
         loop {
@@ -167,15 +167,15 @@ impl Server {
             tokio::spawn(
                 async move {
                     if OPTIONS.server_options.verbose_logging {
-                        LOGGER.info(format!("[{MAGENTA}{addr}{RESET}] Incoming connection"));
+                        SERVER_LOG.info(format!("[{MAGENTA}{addr}{RESET}] Incoming connection"));
                     }
 
                     if let Err(err) = this.handle_connection(stream, &addr).await {
-                        LOGGER.warning(format!(
+                        SERVER_LOG.warning(format!(
                             "[{MAGENTA}{addr}{RESET}] Connection exited with error {err}"
                         ));
                     } else if OPTIONS.server_options.verbose_logging {
-                        LOGGER.info(format!("[{MAGENTA}{addr}{RESET}] Connection exited"));
+                        SERVER_LOG.info(format!("[{MAGENTA}{addr}{RESET}] Connection exited"));
                     }
                 }
                 .instrument(info_span!("control", ?addr)),
@@ -209,7 +209,7 @@ impl Server {
                     match try_bind(static_port).await {
                         Ok(listener) => Ok(listener),
                         Err(err) => {
-                            LOGGER.error(format!("Failed to bind to port: {err}"));
+                            SERVER_LOG.error(format!("Failed to bind to port: {err}"));
 
                             Err("Port is not available")
                         }
@@ -251,7 +251,7 @@ impl Server {
         let mut stream = Delimited::new(stream);
         if let Some(auth) = &self.auth {
             if let Err(err) = auth.server_handshake(&mut stream).await {
-                LOGGER.warning("Server handshake failed".to_string());
+                SERVER_LOG.warning("Server handshake failed".to_string());
                 stream
                     .send(ServerMessage::Error(format!("Handshake failed - {err}")))
                     .await?;
@@ -261,7 +261,7 @@ impl Server {
 
         match stream.recv_timeout().await? {
             Some(ClientMessage::Authenticate(_)) => {
-                LOGGER.warning("Unexpected authenticate");
+                SERVER_LOG.warning("Unexpected authenticate");
                 Ok(())
             }
             Some(ClientMessage::Hello(port, id, static_port)) => {
@@ -270,7 +270,7 @@ impl Server {
                         let (username, token) = id.clone().unwrap();
 
                         if OPTIONS.server_options.verbose_logging {
-                            LOGGER.info(format!(
+                            SERVER_LOG.info(format!(
                                 "[{MAGENTA}{addr}{RESET}] Received Strawberry ID Auth (@{username})"
                             ));
                         }
@@ -278,12 +278,12 @@ impl Server {
                         let auth = id.verify(&username, &token).await?;
 
                         if let Some(auth) = auth.clone() {
-                            LOGGER.info(format!(
+                            SERVER_LOG.info(format!(
                                 "[{MAGENTA}{addr}{RESET}] Authentication successful ({GREEN}{}{C_RESET} ({ITALIC}{CYAN}@{}{C_RESET}))", 
                                 auth.strawberry_id.full_name, auth.strawberry_id.username
                             ));
                         } else {
-                            LOGGER.info(format!("[{MAGENTA}{addr}{RESET}] {YELLOW}{BOLD}<!>{C_RESET} Invalid Strawberry ID Auth (@{username})"));
+                            SERVER_LOG.info(format!("[{MAGENTA}{addr}{RESET}] {YELLOW}{BOLD}<!>{C_RESET} Invalid Strawberry ID Auth (@{username})"));
                             stream
                                 .send(ServerMessage::Error("Invalid Strawberry ID".to_string()))
                                 .await?;
@@ -293,7 +293,7 @@ impl Server {
 
                         auth
                     } else {
-                        LOGGER.info(format!("[{MAGENTA}{addr}{RESET}] {YELLOW}{BOLD}<!>{C_RESET} Invalid Strawberry ID Auth (Client connected without Strawberry ID)"));
+                        SERVER_LOG.info(format!("[{MAGENTA}{addr}{RESET}] {YELLOW}{BOLD}<!>{C_RESET} Invalid Strawberry ID Auth (Client connected without Strawberry ID)"));
 
                         stream.send(ServerMessage::Error(
                             "This server requires a Strawberry ID which you didn't provide. \
@@ -319,7 +319,7 @@ impl Server {
 
                 let port = listener.local_addr()?.port();
 
-                LOGGER.info(format!(
+                SERVER_LOG.info(format!(
                     "[{MAGENTA}{}{C_RESET}] Created tunneling rule for {BLUE}{BOLD}{}{C_RESET}->{MAGENTA}{BOLD}{}:{port}{C_RESET}",
                     addr, addr.ip(), listener.local_addr()?.ip()
                 ));
@@ -341,7 +341,7 @@ impl Server {
                         let (stream2, addr) = result?;
 
                         if OPTIONS.server_options.verbose_logging {
-                            LOGGER.info(format!("External connection at {addr}:{port}"));
+                            SERVER_LOG.info(format!("External connection at {addr}:{port}"));
                         }
 
                         let id = Uuid::new_v4();
@@ -352,7 +352,7 @@ impl Server {
                             // Remove stale entries to avoid memory leaks.
                             sleep(Duration::from_secs(10)).await;
                             if connections.remove(&id).is_some() {
-                                LOGGER.warning(format!("Removed stale connection ({id})"));
+                                SERVER_LOG.warning(format!("Removed stale connection ({id})"));
                             }
                         });
                         stream.send(ServerMessage::Connection(id)).await?;
@@ -361,7 +361,7 @@ impl Server {
             }
             Some(ClientMessage::Accept(id)) => {
                 if OPTIONS.server_options.verbose_logging {
-                    LOGGER.info(format!("Forwarding connection {id}"));
+                    SERVER_LOG.info(format!("Forwarding connection {id}"));
                 }
 
                 match self.connections.remove(&id) {
@@ -371,12 +371,12 @@ impl Server {
                         stream2.write_all(&parts.read_buf).await?;
                         tokio::io::copy_bidirectional(&mut parts.io, &mut stream2).await?;
                     }
-                    None => LOGGER.warning(format!("Missing connection ({id})")),
+                    None => SERVER_LOG.warning(format!("Missing connection ({id})")),
                 }
                 Ok(())
             }
             None => {
-                LOGGER.warning("Client sent empty response");
+                SERVER_LOG.warning("Client sent empty response");
                 Ok(())
             }
         }

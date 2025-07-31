@@ -13,7 +13,7 @@ use crate::cli::OPTIONS;
 use crate::commands::compose::Service;
 use crate::core::auth::authenticator::StrawberryIdAuthenticator;
 use crate::core::auth::secret::Authenticator;
-use crate::core::constants::{LOGGER, LOGGER_2};
+use crate::core::constants::{SERVER_LOG, CLIENT_LOG};
 use crate::core::shared::{ClientMessage, Delimited, NETWORK_TIMEOUT, ServerMessage};
 
 /// State structure for the client.
@@ -85,27 +85,27 @@ impl Client {
         };
 
         if let Some(service) = service {
-            LOGGER.ok(format!(
+            SERVER_LOG.ok(format!(
                 "Starting tunneling service '{CYAN}{}{RESET}'",
                 service.name
             ));
-            LOGGER.info(format!(
+            SERVER_LOG.info(format!(
                 "Forwarding rule: {BLUE}{host}:{port}{RESET}->{ITALIC}{MAGENTA}{server}{RESET}"
             ));
         }
 
         if service.is_none() {
-            LOGGER.ok(format!("Starting tunneling for {BLUE}{host}:{port}{RESET}->{ITALIC}{MAGENTA}{server}{RESET}"));
+            SERVER_LOG.ok(format!("Starting tunneling for {BLUE}{host}:{port}{RESET}->{ITALIC}{MAGENTA}{server}{RESET}"));
         }
 
         if require_auth {
-            LOGGER_2.info("Using Strawberry ID Authentication");
+            CLIENT_LOG.info("Using Strawberry ID Authentication");
         }
 
-        LOGGER.info(format!(
+        SERVER_LOG.info(format!(
             "Connected to server {MAGENTA}{ITALIC}{server}{C_RESET}"
         ));
-        LOGGER.info(format!("Listening at {BLUE}{addr}:{remote_port}{RESET}"));
+        SERVER_LOG.info(format!("Listening at {BLUE}{addr}:{remote_port}{RESET}"));
 
         if service.is_some() {
             println!()
@@ -128,30 +128,30 @@ impl Client {
         let this = Arc::new(self);
         loop {
             match conn.recv().await? {
-                Some(ServerMessage::Hello(_, _)) => LOGGER.warning("Unexpected hello"),
-                Some(ServerMessage::Challenge(_)) => LOGGER.warning("Unexpected challenge"),
+                Some(ServerMessage::Hello(_, _)) => SERVER_LOG.warning("Unexpected hello"),
+                Some(ServerMessage::Challenge(_)) => SERVER_LOG.warning("Unexpected challenge"),
                 Some(ServerMessage::Heartbeat) => (),
                 Some(ServerMessage::Connection(id)) => {
                     let this = Arc::clone(&this);
                     tokio::spawn(
                         async move {
                             if OPTIONS.client_options.verbose_logging {
-                                LOGGER.info(format!("New connection ({GRAY}{id}{C_RESET})"));    
+                                SERVER_LOG.info(format!("New connection ({GRAY}{id}{C_RESET})"));    
                             }
                             match this.handle_connection(id, control_port).await {
                                 Ok(_) => if OPTIONS.client_options.verbose_logging {
-                                    LOGGER.info(format!("Connection exited ({GRAY}{id}{C_RESET})"))
+                                    SERVER_LOG.info(format!("Connection exited ({GRAY}{id}{C_RESET})"))
                                 },
                                 Err(err) => if OPTIONS.client_options.verbose_logging {
-                                    LOGGER.error(format!("Connection ({GRAY}{id}{C_RESET}) exited with error: {err}"))
+                                    SERVER_LOG.error(format!("Connection ({GRAY}{id}{C_RESET}) exited with error: {err}"))
                                 },
                             }
                         }.instrument(info_span!("proxy", %id)),
                     );
                 }
-                Some(ServerMessage::Error(err)) => LOGGER.error(format!("Server error: {err}")),
+                Some(ServerMessage::Error(err)) => SERVER_LOG.error(format!("Server error: {err}")),
                 None => {
-                    LOGGER.error("Lost connection to tunneled instance");
+                    SERVER_LOG.error("Lost connection to tunneled instance");
                     return Ok(());
                 }
             }
