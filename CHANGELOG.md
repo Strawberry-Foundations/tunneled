@@ -6,3 +6,4 @@
 - Updated compose configuration
 - Fixed color issues and copyright year
 - Added support for changing the IP address where the tunnels will listen
+- Updated logging system
