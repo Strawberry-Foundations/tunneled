@@ -7,3 +7,6 @@
 - Fixed color issues and copyright year
 - Added support for changing the IP address where the tunnels will listen
 - Updated logging system
+- Several dependency updates
+- Upgrade to libstrawberry 1.2.0
+- Use Rust 2024 Edition
