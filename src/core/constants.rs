@@ -2,7 +2,7 @@ use lazy_static::lazy_static;
 
 use libstrawberry::colors::{BLUE, BOLD, CYAN, C_RESET, GREEN, RED, YELLOW, GRAY};
 use libstrawberry::logging::features::LoggingFeatures;
-use libstrawberry::logging::formats::LogFormat;
+use libstrawberry::logging::formats::{LogFormat, LogFormatOptions};
 use libstrawberry::logging::Logger;
 
 pub const STRAWBERRY_ID_API: &str = "https://id.strawberryfoundations.org/v2/";
@@ -20,7 +20,7 @@ lazy_static! {
             warning: format!("{C_RESET}{BOLD}{GRAY}[%<time>%]{C_RESET} {YELLOW}[%<levelname>%]{C_RESET} [%<message>%]"),
             critical: format!("{C_RESET}{BOLD}{GRAY}[%<time>%]{C_RESET} {RED}[%<levelname>%]{C_RESET} [%<message>%]"),
             panic: format!("{C_RESET}{BOLD}{GRAY}[%<time>%]{C_RESET} {RED}[%<levelname>%]{C_RESET} [%<message>%]"),
-            log_options: libstrawberry::logging::formats::LogFormatOptions {
+            log_options: LogFormatOptions {
                 timestamp_format: "%Y-%m-%d %H:%M:%S".to_string(),
                 levelname_lowercase: false
             },
@@ -36,7 +36,7 @@ lazy_static! {
             warning: format!("{C_RESET}{BOLD}{GRAY}[%<time>%]{C_RESET} {YELLOW}[%<levelname>%]{C_RESET} [%<message>%]"),
             critical: format!("{C_RESET}{BOLD}{GRAY}[%<time>%]{C_RESET} {RED}[%<levelname>%]{C_RESET} [%<message>%]"),
             panic: format!("{C_RESET}{BOLD}{GRAY}[%<time>%]{C_RESET} {RED}[%<levelname>%]{C_RESET} [%<message>%]"),
-            log_options: libstrawberry::logging::formats::LogFormatOptions {
+            log_options: LogFormatOptions {
                 timestamp_format: "%Y-%m-%d %H:%M:%S".to_string(),
                 levelname_lowercase: false
             },
