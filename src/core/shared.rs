@@ -30,7 +30,7 @@ pub enum ClientMessage {
     Hello(u16, Option<StrawberryIdAuthenticator>, Option<u16>),
 
     /// Accepts an incoming TCP connection, using this stream as a proxy.
-    Accept(Uuid)
+    Accept(Uuid),
 }
 
 /// A message from the server on the control connection.
