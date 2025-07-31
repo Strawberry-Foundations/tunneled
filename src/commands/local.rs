@@ -85,17 +85,17 @@ impl Client {
         };
 
         if let Some(service) = service {
-            SERVER_LOG.ok(format!(
+            CLIENT_LOG.ok(format!(
                 "Starting tunneling service '{CYAN}{}{RESET}'",
                 service.name
             ));
-            SERVER_LOG.info(format!(
+            CLIENT_LOG.info(format!(
                 "Forwarding rule: {BLUE}{host}:{port}{RESET}->{ITALIC}{MAGENTA}{server}{RESET}"
             ));
         }
 
         if service.is_none() {
-            SERVER_LOG.ok(format!("Starting tunneling for {BLUE}{host}:{port}{RESET}->{ITALIC}{MAGENTA}{server}{RESET}"));
+            CLIENT_LOG.ok(format!("Starting tunneling for {BLUE}{host}:{port}{RESET}->{ITALIC}{MAGENTA}{server}{RESET}"));
         }
 
         if require_auth {
@@ -151,7 +151,7 @@ impl Client {
                 }
                 Some(ServerMessage::Error(err)) => SERVER_LOG.error(format!("Server error: {err}")),
                 None => {
-                    SERVER_LOG.error("Lost connection to tunneled instance");
+                    CLIENT_LOG.error("Lost connection to tunneled instance");
                     return Ok(());
                 }
             }

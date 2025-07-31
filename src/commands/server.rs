@@ -123,11 +123,12 @@ impl Server {
 
     /// Start the server, listening for new connections.
     pub async fn listen(self) -> Result<()> {
+        SERVER_LOG.ok(format!("Starting Tunneled server v{}", *VERSION));
+
         let this = Arc::new(self);
         let addr = SocketAddr::from(([0, 0, 0, 0], this.control_port));
         let listener = TcpListener::bind(&addr).await?;
-
-        CLIENT_LOG.ok(format!("Starting Tunneled server v{}", *VERSION));
+        
         SERVER_LOG.info(format!("Server is listening on {MAGENTA}{addr}{C_RESET}"));
         SERVER_LOG.info(format!(
             "Port range: {MAGENTA}{}-{}{C_RESET}",
@@ -152,13 +153,13 @@ impl Server {
         }
 
         if this.require_id {
-            CLIENT_LOG.info(format!(
+            SERVER_LOG.info(format!(
                 "Using Strawberry ID Authentication ({STRAWBERRY_ID_API})"
             ));
         } else if this.auth.is_some() {
-            CLIENT_LOG.info("Using secret authentication");
+            SERVER_LOG.info("Using secret authentication");
         } else {
-            CLIENT_LOG.info("No authentication");
+            SERVER_LOG.info("No authentication");
         }
 
         loop {
@@ -167,15 +168,15 @@ impl Server {
             tokio::spawn(
                 async move {
                     if OPTIONS.server_options.verbose_logging {
-                        SERVER_LOG.info(format!("[{MAGENTA}{addr}{RESET}] Incoming connection"));
+                        CLIENT_LOG.info(format!("[{MAGENTA}{addr}{RESET}] Incoming connection"));
                     }
 
                     if let Err(err) = this.handle_connection(stream, &addr).await {
-                        SERVER_LOG.warning(format!(
+                        CLIENT_LOG.warning(format!(
                             "[{MAGENTA}{addr}{RESET}] Connection exited with error {err}"
                         ));
                     } else if OPTIONS.server_options.verbose_logging {
-                        SERVER_LOG.info(format!("[{MAGENTA}{addr}{RESET}] Connection exited"));
+                        CLIENT_LOG.info(format!("[{MAGENTA}{addr}{RESET}] Connection exited"));
                     }
                 }
                 .instrument(info_span!("control", ?addr)),
@@ -270,7 +271,7 @@ impl Server {
                         let (username, token) = id.clone().unwrap();
 
                         if OPTIONS.server_options.verbose_logging {
-                            SERVER_LOG.info(format!(
+                            CLIENT_LOG.info(format!(
                                 "[{MAGENTA}{addr}{RESET}] Received Strawberry ID Auth (@{username})"
                             ));
                         }
@@ -278,12 +279,12 @@ impl Server {
                         let auth = id.verify(&username, &token).await?;
 
                         if let Some(auth) = auth.clone() {
-                            SERVER_LOG.info(format!(
-                                "[{MAGENTA}{addr}{RESET}] Authentication successful ({GREEN}{}{C_RESET} ({ITALIC}{CYAN}@{}{C_RESET}))", 
+                            CLIENT_LOG.info(format!(
+                                "[{MAGENTA}{addr}{RESET}] Authentication successful ({GREEN}{}{C_RESET} ({ITALIC}{CYAN}@{}{C_RESET}))",
                                 auth.strawberry_id.full_name, auth.strawberry_id.username
                             ));
                         } else {
-                            SERVER_LOG.info(format!("[{MAGENTA}{addr}{RESET}] {YELLOW}{BOLD}<!>{C_RESET} Invalid Strawberry ID Auth (@{username})"));
+                            CLIENT_LOG.info(format!("[{MAGENTA}{addr}{RESET}] {YELLOW}{BOLD}<!>{C_RESET} Invalid Strawberry ID Auth (@{username})"));
                             stream
                                 .send(ServerMessage::Error("Invalid Strawberry ID".to_string()))
                                 .await?;
@@ -293,7 +294,7 @@ impl Server {
 
                         auth
                     } else {
-                        SERVER_LOG.info(format!("[{MAGENTA}{addr}{RESET}] {YELLOW}{BOLD}<!>{C_RESET} Invalid Strawberry ID Auth (Client connected without Strawberry ID)"));
+                        CLIENT_LOG.info(format!("[{MAGENTA}{addr}{RESET}] {YELLOW}{BOLD}<!>{C_RESET} Invalid Strawberry ID Auth (Client connected without Strawberry ID)"));
 
                         stream.send(ServerMessage::Error(
                             "This server requires a Strawberry ID which you didn't provide. \
@@ -319,7 +320,7 @@ impl Server {
 
                 let port = listener.local_addr()?.port();
 
-                SERVER_LOG.info(format!(
+                CLIENT_LOG.info(format!(
                     "[{MAGENTA}{}{C_RESET}] Created tunneling rule for {BLUE}{BOLD}{}{C_RESET}->{MAGENTA}{BOLD}{}:{port}{C_RESET}",
                     addr, addr.ip(), listener.local_addr()?.ip()
                 ));
@@ -341,7 +342,7 @@ impl Server {
                         let (stream2, addr) = result?;
 
                         if OPTIONS.server_options.verbose_logging {
-                            SERVER_LOG.info(format!("External connection at {addr}:{port}"));
+                            CLIENT_LOG.info(format!("External connection at {addr}:{port}"));
                         }
 
                         let id = Uuid::new_v4();
@@ -352,7 +353,7 @@ impl Server {
                             // Remove stale entries to avoid memory leaks.
                             sleep(Duration::from_secs(10)).await;
                             if connections.remove(&id).is_some() {
-                                SERVER_LOG.warning(format!("Removed stale connection ({id})"));
+                                CLIENT_LOG.warning(format!("Removed stale connection ({id})"));
                             }
                         });
                         stream.send(ServerMessage::Connection(id)).await?;
