@@ -86,7 +86,7 @@ pub fn get_plugins() -> anyhow::Result<Box<Vec<LoadedPlugin>>> {
                             let loaded = match load_plugin(&path.to_string_lossy()) {
                                 Ok(plugin) => plugin,
                                 Err(err) => {
-                                    eprintln!(" {RED}!{C_RESET} Plugin Error: {}", err);
+                                    eprintln!(" {RED}!{C_RESET} Plugin Error: {err}");
                                     return Err(anyhow::anyhow!(""))
                                 }
                             };
@@ -110,7 +110,7 @@ pub fn list() -> anyhow::Result<()> {
     let plugins = get_plugins()?;
     
     if plugins.is_empty() {
-        println!("{}{}No plugins found. Please run `tunneled plugin install` to install plugins.{}", RED, BOLD, C_RESET);
+        println!("{RED}{BOLD}No plugins found. Please run `tunneled plugin install` to install plugins.{C_RESET}");
         return Ok(());
     }
     
@@ -137,7 +137,7 @@ pub fn plugin() -> anyhow::Result<()> {
     match args.first().unwrap_or_else(|| std::process::exit(1)).as_str() {
         "list" => {
             if let Err(e) = list() {
-                eprintln!("{}{}Error while listing plugins:{} {e}{}", RED, BOLD, RESET, C_RESET);
+                eprintln!("{RED}{BOLD}Error while listing plugins:{RESET} {e}{C_RESET}");
             }
             Ok(())
         },
@@ -146,7 +146,7 @@ pub fn plugin() -> anyhow::Result<()> {
             if let Some(loaded) = plugins.iter().find(|p| p.properties.id == *plugin_id) {
                 loaded.plugin.execute(&args[1..]);
             } else {
-                eprintln!("{}{}Plugin with id '{}' not found.{}", RED, BOLD, plugin_id, C_RESET);
+                eprintln!("{RED}{BOLD}Plugin with id '{plugin_id}' not found.{C_RESET}");
             }
             Ok(())
         }

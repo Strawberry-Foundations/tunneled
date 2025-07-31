@@ -44,7 +44,7 @@ pub async fn auth(mut auth: StrawberryId) -> anyhow::Result<()> {
 
         if !config_dir.exists() {
             if let Err(err) = fs::create_dir_all(&config_dir) {
-                eprintln!("{RED}{BOLD}Error while creating config directory:{RESET} {}{C_RESET}", err);
+                eprintln!("{RED}{BOLD}Error while creating config directory:{RESET} {err}{C_RESET}");
             }
         }
 
@@ -57,12 +57,12 @@ pub async fn auth(mut auth: StrawberryId) -> anyhow::Result<()> {
             match serde_yaml::to_string(&credentials) {
                 Ok(credentials_str) => {
                     if let Err(err) = fs::write(&credentials_path, credentials_str) {
-                        eprintln!("{RED}{BOLD}Error while writing file:{RESET} {}{C_RESET}", err);
+                        eprintln!("{RED}{BOLD}Error while writing file:{RESET} {err}{C_RESET}");
                     } else {
                         println!("{GREEN}{BOLD}Credentials saved successfully to {}{C_RESET}", credentials_path.display());
                     }
                 }
-                Err(err) => eprintln!("{RED}{BOLD}Error while serializing data:{RESET} {}{C_RESET}", err),
+                Err(err) => eprintln!("{RED}{BOLD}Error while serializing data:{RESET} {err}{C_RESET}"),
             }
         } else {
             println!(

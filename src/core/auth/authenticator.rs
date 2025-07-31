@@ -57,8 +57,7 @@ impl StrawberryIdAuthenticator {
     ) -> anyhow::Result<Option<ClientAuthentication>> {
 
         let auth = reqwest::get(format!(
-            "{STRAWBERRY_ID_API}api/auth?username={}&token={}",
-            username, token
+            "{STRAWBERRY_ID_API}api/auth?username={username}&token={token}"
         ))
         .await?;
     
