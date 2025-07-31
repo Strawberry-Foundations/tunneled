@@ -25,10 +25,10 @@ We are currently working on publishing to crates.io. Please check back later.
 #### Install from GitHub Releases
 ```bash
 # for Linux x86_64
-wget https://github.com/username/tunneled/releases/latest/download/tunneled-x86-64 -O tunneled
+wget https://github.com/Strawberry-Foundations/tunneled/releases/latest/download/tunneled-x86_64 -O tunneled
 
 # for Linux aarch64
-wget https://github.com/username/tunneled/releases/latest/download/tunneled-aarch64 -O tunneled
+wget https://github.com/Strawberry-Foundations/tunneled/releases/latest/download/tunneled-aarch64 -O tunneled
 
 chmod +x tunneled
 ```
