@@ -68,6 +68,7 @@ impl<U: AsyncRead + AsyncWrite + Unpin> Delimited<U> {
         match self.0.next().await {
             Some(Ok(byte_message)) => match serde_json::from_slice(&byte_message) {
                 Ok(obj) => Ok(Some(obj)),
+                // TODO: implement this kind of exception handler in libstrawberry
                 Err(e) => Err(anyhow::anyhow!(
                     "Unable to parse message as JSON!\n\
                     {RED}{BOLD}┌──────────────────────────────────────────┐\n\
