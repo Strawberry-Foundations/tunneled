@@ -1,12 +1,11 @@
 #![allow(dead_code)]
 
-use tokio::time::{self, Duration};
+use libstrawberry::colors::{BOLD, C_RESET, GREEN};
 use serde_json::Value;
-use stblib::colors::{BOLD, C_RESET, GREEN};
+use tokio::time::{self, Duration};
 
 use crate::core::auth::authenticator::StrawberryIdAuthenticator;
 use crate::core::constants::STRAWBERRY_ID_API;
-
 
 #[derive(Debug, Default, Clone)]
 pub struct StrawberryId {
@@ -35,12 +34,21 @@ impl StrawberryId {
                     println!("{GREEN}{BOLD}Authentication successful{C_RESET}");
 
                     self.email = data["data"]["user"]["email"].as_str().unwrap().to_string();
-                    self.full_name = data["data"]["user"]["full_name"].as_str().unwrap().to_string();
-                    self.profile_picture = data["data"]["user"]["profile_picture_url"].as_str().unwrap().to_string();
-                    self.username = data["data"]["user"]["username"].as_str().unwrap().to_string();
+                    self.full_name = data["data"]["user"]["full_name"]
+                        .as_str()
+                        .unwrap()
+                        .to_string();
+                    self.profile_picture = data["data"]["user"]["profile_picture_url"]
+                        .as_str()
+                        .unwrap()
+                        .to_string();
+                    self.username = data["data"]["user"]["username"]
+                        .as_str()
+                        .unwrap()
+                        .to_string();
                     self.token = data["data"]["user"]["token"].as_str().unwrap().to_string();
 
-                    break
+                    break;
                 }
             }
 
@@ -51,9 +59,9 @@ impl StrawberryId {
     }
 
     pub fn authenticator(username: String, token: String) -> StrawberryIdAuthenticator {
-            StrawberryIdAuthenticator {
-                username: Some(username),
-                token: Some(token),
-            }
+        StrawberryIdAuthenticator {
+            username: Some(username),
+            token: Some(token),
+        }
     }
 }

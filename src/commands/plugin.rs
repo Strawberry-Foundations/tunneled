@@ -2,8 +2,8 @@
 
 use std::{env, fs};
 use libloading::{Library, Symbol};
-use stblib::colors::{C_RESET, RED, BOLD, RESET, CYAN, GREEN, UNDERLINE, WHITE, MAGENTA};
-use stblib::external::plugin::{Plugin, PluginProperties};
+use libstrawberry::colors::{C_RESET, RED, BOLD, RESET, CYAN, GREEN, UNDERLINE, WHITE, MAGENTA};
+use libstrawberry::external::plugin::{Plugin, PluginProperties};
 use thiserror::Error;
 use crate::core::constants::VERSION;
 

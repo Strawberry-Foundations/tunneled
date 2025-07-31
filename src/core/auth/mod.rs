@@ -1,8 +1,8 @@
 use crate::core::auth::strawberry_id::StrawberryId;
 
-pub mod strawberry_id;
 pub mod authenticator;
 pub mod secret;
+pub mod strawberry_id;
 
 pub struct Auth;
 

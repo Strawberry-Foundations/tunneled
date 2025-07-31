@@ -2,7 +2,7 @@ use std::fs::File;
 use std::io::Read;
 use anyhow::Result;
 use serde::Deserialize;
-use stblib::colors::{BOLD, C_RESET, CYAN, RED, RESET};
+use libstrawberry::colors::{BOLD, C_RESET, CYAN, RED, RESET};
 
 use crate::commands::local::Client;
 

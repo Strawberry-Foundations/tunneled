@@ -1,5 +1,5 @@
 use std::env;
-use stblib::colors::{BOLD, C_RESET, RED, RESET};
+use libstrawberry::colors::{BOLD, C_RESET, RED, RESET};
 use std::collections::HashMap;
 
 #[derive(Clone)]

@@ -1,4 +1,4 @@
-use stblib::colors::{C_RESET, GREEN, BOLD, UNDERLINE, CYAN, RESET, WHITE, RED, MAGENTA};
+use libstrawberry::colors::{C_RESET, GREEN, BOLD, UNDERLINE, CYAN, RESET, WHITE, RED, MAGENTA};
 use crate::core::constants::VERSION;
 
 pub fn help() {
