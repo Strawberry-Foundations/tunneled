@@ -1,4 +1,4 @@
-use stblib::external::plugin::{Plugin, PluginProperties};
+use libstrawberry::external::plugin::{Plugin, PluginProperties};
 
 pub struct ExamplePlugin;
 
@@ -40,7 +40,7 @@ pub extern "C" fn create_plugin() -> (Box<dyn Plugin>, PluginProperties) {
         id: "example-plugin",
         package_id: "com.example.exampleplugin",
         version: env!("CARGO_PKG_VERSION"),
-        library_version: stblib::VERSION,
+        library_version: libstrawberry::VERSION,
     };
 
     (Box::new(ExamplePlugin), PROPERTIES)
