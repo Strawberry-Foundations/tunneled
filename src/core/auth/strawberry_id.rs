@@ -26,30 +26,32 @@ impl StrawberryId {
         let mut interval = time::interval(Duration::from_secs(5));
 
         loop {
-            let response = reqwest::get(format!("{STRAWBERRY_ID_API}api/oauth/callback?code={code}")).await?;
+            let response =
+                reqwest::get(format!("{STRAWBERRY_ID_API}api/oauth/callback?code={code}")).await?;
             let body = response.text().await?;
 
-            if let Ok(data) = self.serializer(body.as_str()) {
-                if data["data"]["status"] != "Invalid Code" && data["data"]["status"] != "Not authenticated" {
-                    println!("{GREEN}{BOLD}Authentication successful{C_RESET}");
+            if let Ok(data) = self.serializer(body.as_str())
+                && data["data"]["status"] != "Invalid Code"
+                && data["data"]["status"] != "Not authenticated"
+            {
+                println!("{GREEN}{BOLD}Authentication successful{C_RESET}");
 
-                    self.email = data["data"]["user"]["email"].as_str().unwrap().to_string();
-                    self.full_name = data["data"]["user"]["full_name"]
-                        .as_str()
-                        .unwrap()
-                        .to_string();
-                    self.profile_picture = data["data"]["user"]["profile_picture_url"]
-                        .as_str()
-                        .unwrap()
-                        .to_string();
-                    self.username = data["data"]["user"]["username"]
-                        .as_str()
-                        .unwrap()
-                        .to_string();
-                    self.token = data["data"]["user"]["token"].as_str().unwrap().to_string();
+                self.email = data["data"]["user"]["email"].as_str().unwrap().to_string();
+                self.full_name = data["data"]["user"]["full_name"]
+                    .as_str()
+                    .unwrap()
+                    .to_string();
+                self.profile_picture = data["data"]["user"]["profile_picture_url"]
+                    .as_str()
+                    .unwrap()
+                    .to_string();
+                self.username = data["data"]["user"]["username"]
+                    .as_str()
+                    .unwrap()
+                    .to_string();
+                self.token = data["data"]["user"]["token"].as_str().unwrap().to_string();
 
-                    break;
-                }
+                break;
             }
 
             interval.tick().await;
