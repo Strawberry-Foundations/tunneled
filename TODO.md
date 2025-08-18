@@ -1,2 +1,4 @@
 - Interactive TUI
 - HTTP / SSH / WebSocket tunneling (plugin)
+- Password-protected private tunnels
+- Load balancing (?)

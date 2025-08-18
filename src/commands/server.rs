@@ -10,7 +10,9 @@ use tokio::time::{sleep, timeout};
 
 use anyhow::Result;
 use dashmap::DashMap;
-use libstrawberry::colors::{BLUE, BOLD, C_RESET, CYAN, GREEN, ITALIC, MAGENTA, RED, RESET, YELLOW};
+use libstrawberry::colors::{
+    BLUE, BOLD, C_RESET, CYAN, GREEN, ITALIC, MAGENTA, RED, RESET, YELLOW,
+};
 use serde::Deserialize;
 use tracing::{Instrument, info_span};
 use uuid::Uuid;
@@ -18,7 +20,7 @@ use uuid::Uuid;
 use crate::cli::OPTIONS;
 use crate::core::auth::authenticator::ClientAuthentication;
 use crate::core::auth::secret::Authenticator;
-use crate::core::constants::{SERVER_LOG, CLIENT_LOG, STRAWBERRY_ID_API, VERSION};
+use crate::core::constants::{CLIENT_LOG, SERVER_LOG, STRAWBERRY_ID_API, VERSION};
 use crate::core::shared::{ClientMessage, Delimited, ServerMessage};
 
 /// State structure for the server.
@@ -128,7 +130,7 @@ impl Server {
         let this = Arc::new(self);
         let addr = SocketAddr::from(([0, 0, 0, 0], this.control_port));
         let listener = TcpListener::bind(&addr).await?;
-        
+
         SERVER_LOG.info(format!("Server is listening on {MAGENTA}{addr}{C_RESET}"));
         SERVER_LOG.info(format!(
             "Port range: {MAGENTA}{}-{}{C_RESET}",
@@ -250,14 +252,14 @@ impl Server {
 
     async fn handle_connection(&self, stream: TcpStream, addr: &SocketAddr) -> Result<()> {
         let mut stream = Delimited::new(stream);
-        if let Some(auth) = &self.auth {
-            if let Err(err) = auth.server_handshake(&mut stream).await {
-                SERVER_LOG.warning("Server handshake failed".to_string());
-                stream
-                    .send(ServerMessage::Error(format!("Handshake failed - {err}")))
-                    .await?;
-                return Ok(());
-            }
+        if let Some(auth) = &self.auth
+            && let Err(err) = auth.server_handshake(&mut stream).await
+        {
+            SERVER_LOG.warning("Server handshake failed".to_string());
+            stream
+                .send(ServerMessage::Error(format!("Handshake failed - {err}")))
+                .await?;
+            return Ok(());
         }
 
         match stream.recv_timeout().await? {

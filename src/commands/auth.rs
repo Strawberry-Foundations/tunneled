@@ -42,10 +42,8 @@ pub async fn auth(mut auth: StrawberryId) -> anyhow::Result<()> {
         let config_dir = home_dir.join(".config").join("tunneled");
         let credentials_path = config_dir.join("credentials.yml");
 
-        if !config_dir.exists() {
-            if let Err(err) = fs::create_dir_all(&config_dir) {
-                eprintln!("{RED}{BOLD}Error while creating config directory:{RESET} {err}{C_RESET}");
-            }
+        if !config_dir.exists() && let Err(err) = fs::create_dir_all(&config_dir) {
+            eprintln!("{RED}{BOLD}Error while creating config directory:{RESET} {err}{C_RESET}");
         }
 
         if !credentials_path.exists() {
