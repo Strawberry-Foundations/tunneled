@@ -12,7 +12,7 @@ struct Credentials {
     token: String,
 }
 
-pub async fn auth(mut auth: StrawberryId) -> anyhow::Result<()> {
+pub async fn login(mut auth: StrawberryId) -> anyhow::Result<()> {
     println!("--- {CYAN}{BOLD}Strawberry ID Login{C_RESET} ---");
 
     let request = reqwest::get(format!("{STRAWBERRY_ID_API}api/request")).await?;

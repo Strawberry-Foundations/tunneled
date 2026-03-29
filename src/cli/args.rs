@@ -7,7 +7,7 @@ pub enum Command {
     Local,
     Server,
     Compose,
-    Auth,
+    Login,
     About,
     Plugin,
     None,
@@ -65,7 +65,7 @@ impl Args {
         let command_map = HashMap::from([
             ("local", Command::Local),
             ("server", Command::Server),
-            ("auth", Command::Auth),
+            ("login", Command::Login),
             ("about", Command::About),
             ("compose", Command::Compose),
             ("plugin", Command::Plugin),

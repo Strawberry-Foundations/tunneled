@@ -16,7 +16,7 @@ use libstrawberry::colors::{BOLD, C_RESET, RED, RESET};
 
 use crate::cli::args::Command;
 use crate::cli::{ARGS, OPTIONS};
-use crate::commands::auth::auth;
+use crate::commands::login::login;
 use crate::commands::compose::compose;
 use crate::commands::local::Client;
 use crate::commands::server::{read_config_file, Server};
@@ -102,7 +102,7 @@ async fn main() -> Result<()> {
                 .await?;
             }
         }
-        Command::Auth => auth(Auth::strawberry_id()).await?,
+        Command::Login => login(Auth::strawberry_id()).await?,
         Command::About => commands::about::about(),
         Command::Plugin => commands::plugin::plugin()?,
         Command::None => commands::help::help(),
