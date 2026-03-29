@@ -35,7 +35,6 @@ pub fn help() {
 
     {CYAN}{BOLD}compose:{C_RESET} Starts one or more local proxies for the remote server using a configuration file
      {BOLD}↳ {MAGENTA}Options:{C_RESET}
-            {CYAN}{BOLD}-f, --file <file>{C_RESET}     Configuration file for proxy services   {GREEN}{BOLD}[default: service.yml]{C_RESET}
-", *VERSION);
+            {CYAN}{BOLD}-f, --file <file>{C_RESET}     Configuration file for proxy services   {GREEN}{BOLD}[default: service.yml]{C_RESET}", *VERSION);
     std::process::exit(0);
 }
