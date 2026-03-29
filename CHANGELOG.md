@@ -1,12 +1,3 @@
-# Changelog for next-gen Tunneled (v2.5.0)
-- Added plugin subsystem
-- Optimized arg parser
-- Improved logging
-- Added verbose mode for client
-- Updated compose configuration
-- Fixed color issues and copyright year
-- Added support for changing the IP address where the tunnels will listen
-- Updated logging system
+# Changelog for Tunneled (v2.5.1)
 - Several dependency updates
-- Upgrade to libstrawberry 1.2.0
-- Use Rust 2024 Edition
+- Upgrade to libstrawberry 1.4.4
