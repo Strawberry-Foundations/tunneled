@@ -1,4 +1,4 @@
-use libstrawberry::external::plugin::{Plugin, PluginProperties};
+use libstrawberry::ext::plugin::{Plugin, PluginProperties};
 
 pub struct ExamplePlugin;
 
