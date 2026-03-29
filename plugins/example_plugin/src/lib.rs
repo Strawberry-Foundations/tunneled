@@ -33,7 +33,7 @@ impl Plugin for ExamplePlugin {
 }
 
 #[allow(improper_ctypes_definitions)]
-#[no_mangle]
+#[unsafe(no_mangle)]
 pub extern "C" fn create_plugin() -> (Box<dyn Plugin>, PluginProperties) {
     const PROPERTIES: PluginProperties = PluginProperties {
         name: "Example Plugin",
