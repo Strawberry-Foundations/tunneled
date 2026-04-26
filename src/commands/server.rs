@@ -87,7 +87,7 @@ pub struct ServerConfig {
 }
 
 pub fn read_config_file(file_path: &str) -> Result<ServerConfig, Box<dyn std::error::Error>> {
-    let mut file = if let Ok(file) = File::open(file_path) { file } else {
+    let Ok(mut file) = File::open(file_path) else {
         eprintln!("{RED}{BOLD} ! {RESET} File '{CYAN}{file_path}{RESET}' not found{C_RESET}");
         std::process::exit(1);
     };
@@ -188,7 +188,7 @@ impl Server {
         &self,
         port: u16,
         static_port: Option<u16>,
-        id: &Option<ClientAuthentication>,
+        id: Option<&ClientAuthentication>,
     ) -> Result<TcpListener, &'static str> {
         let try_bind = |port: u16| async move {
             TcpListener::bind((self.tunnels_addr.as_ref(), port))
@@ -238,15 +238,13 @@ impl Server {
             // conditions, when ε=0.15 and δ=0.00001.
             for _ in 0..150 {
                 let port = fastrand::u16(self.port_range.clone());
-                match try_bind(port).await {
-                    Ok(listener) => return Ok(listener),
-                    Err(_) => continue,
-                }
+                if let Ok(listener) = try_bind(port).await { return Ok(listener) }
             }
             Err("failed to find an available port")
         }
     }
 
+    #[allow(clippy::too_many_lines)]
     async fn handle_connection(&self, stream: TcpStream, addr: &SocketAddr) -> Result<()> {
         let mut stream = Delimited::new(stream);
         if let Some(auth) = &self.auth
@@ -307,7 +305,7 @@ impl Server {
                 };
 
                 let listener = match self
-                    .create_listener(port, static_port, &strawberry_id)
+                    .create_listener(port, static_port, strawberry_id.as_ref())
                     .await
                 {
                     Ok(listener) => listener,
@@ -332,11 +330,11 @@ impl Server {
                     .await?;
 
                 loop {
+                    const TIMEOUT: Duration = Duration::from_millis(500);
                     if stream.send(ServerMessage::Heartbeat).await.is_err() {
                         // Assume that the TCP connection has been dropped.
                         return Ok(());
                     }
-                    const TIMEOUT: Duration = Duration::from_millis(500);
                     if let Ok(result) = timeout(TIMEOUT, listener.accept()).await {
                         let (stream2, addr) = result?;
 

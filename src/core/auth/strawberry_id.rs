@@ -17,7 +17,7 @@ pub struct StrawberryId {
 }
 
 impl StrawberryId {
-    fn serializer(&self, text: &str) -> Result<Value, serde_json::Error> {
+    fn serializer(text: &str) -> Result<Value, serde_json::Error> {
         let serializer = serde_json::from_str(text)?;
         Ok(serializer)
     }
@@ -30,7 +30,7 @@ impl StrawberryId {
                 reqwest::get(format!("{STRAWBERRY_ID_API}api/oauth/callback?code={code}")).await?;
             let body = response.text().await?;
 
-            if let Ok(data) = self.serializer(body.as_str())
+            if let Ok(data) = Self::serializer(body.as_str())
                 && data["data"]["status"] != "Invalid Code"
                 && data["data"]["status"] != "Not authenticated"
             {

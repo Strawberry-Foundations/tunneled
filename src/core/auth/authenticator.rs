@@ -47,7 +47,7 @@ impl StrawberryIdAuthenticator {
         (self.username.clone().unwrap(), self.token.unwrap())
     }
 
-    fn serializer(&self, text: &str) -> Result<Value, serde_json::Error> {
+    fn serializer(text: &str) -> Result<Value, serde_json::Error> {
         let serializer = serde_json::from_str(text)?;
         Ok(serializer)
     }
@@ -66,7 +66,7 @@ impl StrawberryIdAuthenticator {
 
         let mut client_auth = ClientAuthentication::default();
 
-        if let Ok(data) = self.serializer(body.as_str())
+        if let Ok(data) = Self::serializer(body.as_str())
             && data["data"]["status"] == "Ok"
         {
             client_auth.strawberry_id.full_name = data["data"]["user"]["full_name"]

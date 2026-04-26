@@ -28,7 +28,7 @@ pub struct Services {
 }
 
 pub fn read_service_file(file_path: &str) -> Result<Services, Box<dyn std::error::Error>> {
-    let mut file = if let Ok(file) = File::open(file_path) { file } else {
+    let Ok(mut file) = File::open(file_path) else {
         eprintln!("{RED}{BOLD} ! {RESET} File '{CYAN}{file_path}{RESET}' not found{C_RESET}");
         std::process::exit(1);
     };
@@ -42,17 +42,24 @@ pub fn read_service_file(file_path: &str) -> Result<Services, Box<dyn std::error
 
 pub async fn compose(path: Option<&str>) -> Result<()> {
     let path = path.unwrap_or("services.yml");
-    let services = read_service_file(path).unwrap();
+    let services = read_service_file(path)
+        .map_err(|err| anyhow::anyhow!("Failed to read service file: {err}"))?;
     let mut handles = vec![];
 
     for service in services.services.clone() {
         let handle = tokio::spawn(async move {
             let service_clone = service.clone();
+            let host = service
+                .host
+                .unwrap_or_else(|| String::from("localhost"));
+            let server = service
+                .server
+                .unwrap_or_else(|| String::from("strawberryfoundations.org"));
 
             let client = Client::new(
-                &service.host.unwrap_or(String::from("localhost")),
+                &host,
                 service.port,
-                &service.server.unwrap_or(String::from("strawberryfoundations.org")),
+                &server,
                 service.secret.as_deref(),
                 service.static_port,
                 service.control_port.unwrap_or(7835),

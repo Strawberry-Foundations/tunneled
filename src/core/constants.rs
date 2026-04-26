@@ -1,4 +1,4 @@
-use lazy_static::lazy_static;
+use std::sync::LazyLock;
 
 use libstrawberry::colors::{BLUE, BOLD, C_RESET, GREEN, RED, YELLOW, GRAY};
 use libstrawberry::logging::features::LoggingFeatures;
@@ -8,10 +8,10 @@ use libstrawberry::logging::Logger;
 pub const STRAWBERRY_ID_API: &str = "https://id.strawberryfoundations.org/v2/";
 // pub const STRAWBERRY_ID_API: &str = "http://192.168.0.194:8082/v1/";
 
-lazy_static! {
-    pub static ref VERSION: String = env!("CARGO_PKG_VERSION").to_string();
+pub static VERSION: LazyLock<String> = LazyLock::new(|| env!("CARGO_PKG_VERSION").to_string());
 
-    pub static ref SERVER_LOG: Logger = Logger::new(
+pub static SERVER_LOG: LazyLock<Logger> = LazyLock::new(|| {
+    Logger::new(
         LoggingFeatures::new(),
         LogFormat {
             info: format!("{C_RESET}{BOLD}{GRAY}[%<time>%]{C_RESET} {GREEN}[%<levelname>%]{GRAY} @ {GREEN}SERVER{C_RESET}    [%<message>%]"),
@@ -25,9 +25,11 @@ lazy_static! {
                 levelname_lowercase: false
             },
         }
-    );
+    )
+});
 
-    pub static ref CLIENT_LOG: Logger = Logger::new(
+pub static CLIENT_LOG: LazyLock<Logger> = LazyLock::new(|| {
+    Logger::new(
         LoggingFeatures::new(),
         LogFormat {
             info: format!("{C_RESET}{BOLD}{GRAY}[%<time>%]{C_RESET} {GREEN}[%<levelname>%]{GRAY} @ {GREEN}CLIENT{C_RESET}    [%<message>%]"),
@@ -41,5 +43,5 @@ lazy_static! {
                 levelname_lowercase: false
             },
         }
-    );
-}
+    )
+});

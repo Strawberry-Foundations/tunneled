@@ -1,8 +1,9 @@
 pub mod args;
 
-use lazy_static::lazy_static;
+use std::sync::LazyLock;
 
-lazy_static!(
-    pub static ref ARGS: args::Args = args::Args::collect();
-    pub static ref OPTIONS: args::Options = args::Args::collect().collect_options();
-);
+pub static ARGS: LazyLock<args::Args> = LazyLock::new(args::Args::collect);
+pub static OPTIONS: LazyLock<args::Options> = LazyLock::new(|| {
+    let mut args = args::Args::collect();
+    args.collect_options()
+});

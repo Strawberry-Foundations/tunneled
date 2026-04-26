@@ -41,13 +41,11 @@ impl Authenticator {
     /// ```
     #[must_use] 
     pub fn validate(&self, challenge: &Uuid, tag: &str) -> bool {
-        if let Ok(tag) = hex::decode(tag) {
+        hex::decode(tag).is_ok_and(|tag| {
             let mut hmac = self.0.clone();
             hmac.update(challenge.as_bytes());
             hmac.verify_slice(&tag).is_ok()
-        } else {
-            false
-        }
+        })
     }
 
     /// As the server, send a challenge to the client and validate their response.
@@ -74,9 +72,8 @@ impl Authenticator {
         &self,
         stream: &mut Delimited<T>,
     ) -> Result<()> {
-        let challenge = match stream.recv_timeout().await? {
-            Some(ServerMessage::Challenge(challenge)) => challenge,
-            _ => bail!("expected authentication challenge, but no secret was required"),
+        let Some(ServerMessage::Challenge(challenge)) = stream.recv_timeout().await? else {
+            bail!("expected authentication challenge, but no secret was required");
         };
         let tag = self.answer(&challenge);
         stream.send(ClientMessage::Authenticate(tag)).await?;

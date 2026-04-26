@@ -63,7 +63,11 @@ pub fn get_plugins() -> anyhow::Result<Box<Vec<LoadedPlugin>>> {
         if plugin_dir.exists() {
             plugin_dir
         } else {
-            fs::create_dir_all(&plugin_dir).expect("Failed to create plugin directory");
+            fs::create_dir_all(&plugin_dir).map_err(|err| {
+                anyhow::anyhow!(
+                    "{RED}{BOLD}Error while fetching plugin directory:{RESET} Failed to create plugin directory ({err}).{C_RESET}"
+                )
+            })?;
             return Err(anyhow::anyhow!(
                 "{RED}{BOLD}Error while fetching plugin directory:{RESET} Plugin directory does not exist. Please run `tunneled plugin install` to install plugins.{C_RESET}"
             ));
@@ -131,19 +135,23 @@ pub fn plugin() -> anyhow::Result<()> {
         help();
         return Ok(());
     }
-    
+
     if args.first().unwrap_or_else(|| std::process::exit(1)).as_str() == "list" {
         if let Err(e) = list() {
             eprintln!("{RED}{BOLD}Error while listing plugins:{RESET} {e}{C_RESET}");
         }
-        Ok(())
     } else {
-        let plugin_id = args.first().expect("No plugin ID provided");
+        let Some(plugin_id) = args.first() else {
+            help();
+            return Ok(());
+        };
+
         if let Some(loaded) = plugins.iter().find(|p| p.properties.id == *plugin_id) {
             loaded.plugin.execute(&args[1..]);
         } else {
             eprintln!("{RED}{BOLD}Plugin with id '{plugin_id}' not found.{C_RESET}");
         }
-        Ok(())
     }
+
+    Ok(())
 }

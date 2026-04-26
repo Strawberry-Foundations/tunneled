@@ -1,4 +1,5 @@
 #![warn(clippy::all, clippy::nursery, clippy::pedantic)]
+#![allow(clippy::missing_errors_doc, clippy::missing_panics_doc)]
 //! A modern, simple TCP tunnel in Rust that exposes local ports to a remote
 //! server, bypassing standard NAT connection firewalls.
 //!
