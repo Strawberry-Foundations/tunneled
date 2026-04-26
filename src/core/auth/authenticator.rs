@@ -21,7 +21,7 @@ pub struct StrawberryIdAuthenticator {
 }
 
 impl StrawberryIdAuthenticator {
-    pub fn fetch() -> Result<StrawberryIdAuthenticator, Box<dyn std::error::Error>> {
+    pub fn fetch() -> Result<Self, Box<dyn std::error::Error>> {
         // todo: change to XDG User Directories
         if let Some(home_dir) = dirs::home_dir() {
             let config_dir = home_dir.join(".config").join("tunneled");
@@ -30,7 +30,7 @@ impl StrawberryIdAuthenticator {
             if credentials_path.exists() {
                 let credentials_str = fs::read_to_string(&credentials_path)?;
 
-                let credentials: StrawberryIdAuthenticator =
+                let credentials: Self =
                     serde_yaml::from_str(&credentials_str)?;
 
                 Ok(credentials)
@@ -42,6 +42,7 @@ impl StrawberryIdAuthenticator {
         }
     }
 
+    #[must_use] 
     pub fn unwrap(self) -> (String, String) {
         (self.username.clone().unwrap(), self.token.unwrap())
     }

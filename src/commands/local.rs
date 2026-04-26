@@ -108,10 +108,10 @@ impl Client {
         SERVER_LOG.info(format!("Listening at {BLUE}{addr}:{remote_port}{RESET}"));
 
         if service.is_some() {
-            println!()
+            println!();
         }
 
-        Ok(Client {
+        Ok(Self {
             connection: Some(stream),
             to: server.to_string(),
             local_host: host.to_string(),
@@ -139,11 +139,11 @@ impl Client {
                                 SERVER_LOG.info(format!("New connection ({GRAY}{id}{C_RESET})"));    
                             }
                             match this.handle_connection(id, control_port).await {
-                                Ok(_) => if OPTIONS.client_options.verbose_logging {
-                                    SERVER_LOG.info(format!("Connection exited ({GRAY}{id}{C_RESET})"))
+                                Ok(()) => if OPTIONS.client_options.verbose_logging {
+                                    SERVER_LOG.info(format!("Connection exited ({GRAY}{id}{C_RESET})"));
                                 },
                                 Err(err) => if OPTIONS.client_options.verbose_logging {
-                                    SERVER_LOG.error(format!("Connection ({GRAY}{id}{C_RESET}) exited with error: {err}"))
+                                    SERVER_LOG.error(format!("Connection ({GRAY}{id}{C_RESET}) exited with error: {err}"));
                                 },
                             }
                         }.instrument(info_span!("proxy", %id)),

@@ -65,14 +65,12 @@ pub fn get_plugins() -> anyhow::Result<Box<Vec<LoadedPlugin>>> {
         } else {
             fs::create_dir_all(&plugin_dir).expect("Failed to create plugin directory");
             return Err(anyhow::anyhow!(
-                "{}{}Error while fetching plugin directory:{} Plugin directory does not exist. Please run `tunneled plugin install` to install plugins.{}",
-                RED, BOLD, RESET, C_RESET
+                "{RED}{BOLD}Error while fetching plugin directory:{RESET} Plugin directory does not exist. Please run `tunneled plugin install` to install plugins.{C_RESET}"
             ));
         }
     } else {
         anyhow::bail!(
-            "{}{}Error while fetching plugin directory:{} Home directory not found.{}",
-            RED, BOLD, RESET, C_RESET
+            "{RED}{BOLD}Error while fetching plugin directory:{RESET} Home directory not found.{C_RESET}"
         );
     };
 
@@ -134,21 +132,18 @@ pub fn plugin() -> anyhow::Result<()> {
         return Ok(());
     }
     
-    match args.first().unwrap_or_else(|| std::process::exit(1)).as_str() {
-        "list" => {
-            if let Err(e) = list() {
-                eprintln!("{RED}{BOLD}Error while listing plugins:{RESET} {e}{C_RESET}");
-            }
-            Ok(())
-        },
-        &_ => {
-            let plugin_id = args.first().expect("No plugin ID provided");
-            if let Some(loaded) = plugins.iter().find(|p| p.properties.id == *plugin_id) {
-                loaded.plugin.execute(&args[1..]);
-            } else {
-                eprintln!("{RED}{BOLD}Plugin with id '{plugin_id}' not found.{C_RESET}");
-            }
-            Ok(())
+    if args.first().unwrap_or_else(|| std::process::exit(1)).as_str() == "list" {
+        if let Err(e) = list() {
+            eprintln!("{RED}{BOLD}Error while listing plugins:{RESET} {e}{C_RESET}");
         }
+        Ok(())
+    } else {
+        let plugin_id = args.first().expect("No plugin ID provided");
+        if let Some(loaded) = plugins.iter().find(|p| p.properties.id == *plugin_id) {
+            loaded.plugin.execute(&args[1..]);
+        } else {
+            eprintln!("{RED}{BOLD}Plugin with id '{plugin_id}' not found.{C_RESET}");
+        }
+        Ok(())
     }
 }

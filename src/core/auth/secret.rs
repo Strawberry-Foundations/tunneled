@@ -13,12 +13,14 @@ pub struct Authenticator(Hmac<Sha256>);
 
 impl Authenticator {
     /// Generate an authenticator from a secret.
+    #[must_use] 
     pub fn new(secret: &str) -> Self {
         let hashed_secret = Sha256::new().chain_update(secret).finalize();
         Self(Hmac::new_from_slice(&hashed_secret).expect("HMAC can take key of any size"))
     }
 
     /// Generate a reply message for a challenge.
+    #[must_use] 
     pub fn answer(&self, challenge: &Uuid) -> String {
         let mut hmac = self.0.clone();
         hmac.update(challenge.as_bytes());
@@ -37,6 +39,7 @@ impl Authenticator {
     /// assert!(auth.validate(&challenge, &auth.answer(&challenge)));
     /// assert!(!auth.validate(&challenge, "wrong answer"));
     /// ```
+    #[must_use] 
     pub fn validate(&self, challenge: &Uuid, tag: &str) -> bool {
         if let Ok(tag) = hex::decode(tag) {
             let mut hmac = self.0.clone();

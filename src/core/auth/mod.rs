@@ -7,7 +7,8 @@ pub mod strawberry_id;
 pub struct Auth;
 
 impl Auth {
-    pub fn strawberry_id() -> StrawberryId {
+    #[must_use] 
+    pub const fn strawberry_id() -> StrawberryId {
         StrawberryId {
             email: String::new(),
             full_name: String::new(),

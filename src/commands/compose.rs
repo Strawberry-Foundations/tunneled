@@ -28,12 +28,9 @@ pub struct Services {
 }
 
 pub fn read_service_file(file_path: &str) -> Result<Services, Box<dyn std::error::Error>> {
-    let mut file = match File::open(file_path) {
-        Ok(file) => file,
-        Err(_) => {
-            eprintln!("{RED}{BOLD} ! {RESET} File '{CYAN}{file_path}{RESET}' not found{C_RESET}");
-            std::process::exit(1);
-        }
+    let mut file = if let Ok(file) = File::open(file_path) { file } else {
+        eprintln!("{RED}{BOLD} ! {RESET} File '{CYAN}{file_path}{RESET}' not found{C_RESET}");
+        std::process::exit(1);
     };
     let mut contents = String::new();
     file.read_to_string(&mut contents)?;
@@ -67,7 +64,7 @@ pub async fn compose(path: Option<&str>) -> Result<()> {
             });
 
             client.listen().await.unwrap_or_else(|err| {
-                eprintln!("{RED}{BOLD} ! {C_RESET} {err}")
+                eprintln!("{RED}{BOLD} ! {C_RESET} {err}");
             });
         });
         handles.push(handle);

@@ -87,12 +87,9 @@ pub struct ServerConfig {
 }
 
 pub fn read_config_file(file_path: &str) -> Result<ServerConfig, Box<dyn std::error::Error>> {
-    let mut file = match File::open(file_path) {
-        Ok(file) => file,
-        Err(_) => {
-            eprintln!("{RED}{BOLD} ! {RESET} File '{CYAN}{file_path}{RESET}' not found{C_RESET}");
-            std::process::exit(1);
-        }
+    let mut file = if let Ok(file) = File::open(file_path) { file } else {
+        eprintln!("{RED}{BOLD} ! {RESET} File '{CYAN}{file_path}{RESET}' not found{C_RESET}");
+        std::process::exit(1);
     };
     let mut contents = String::new();
     file.read_to_string(&mut contents)?;
@@ -112,7 +109,7 @@ impl Server {
         tunnels_addr: String,
     ) -> Self {
         assert!(!port_range.is_empty(), "must provide at least one port");
-        Server {
+        Self {
             port_range,
             connections: Arc::new(DashMap::new()),
             auth: secret.map(Authenticator::new),
@@ -207,7 +204,7 @@ impl Server {
             if let Some(id) = id {
                 if self
                     .whitelist_static_port
-                    .contains(&id.strawberry_id.email.to_string())
+                    .contains(&id.strawberry_id.email.clone())
                 {
                     match try_bind(static_port).await {
                         Ok(listener) => Ok(listener),

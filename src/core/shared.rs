@@ -81,8 +81,7 @@ impl<U: AsyncRead + AsyncWrite + Unpin> Delimited<U> {
                 )),
             },
             Some(Err(e)) => Err(anyhow::anyhow!(
-                "Frame error, invalid byte length or IO error: {}",
-                e
+                "Frame error, invalid byte length or IO error: {e}"
             )),
             None => Ok(None),
         }

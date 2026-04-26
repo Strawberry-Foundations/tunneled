@@ -46,7 +46,12 @@ pub async fn login(mut auth: StrawberryId) -> anyhow::Result<()> {
             eprintln!("{RED}{BOLD}Error while creating config directory:{RESET} {err}{C_RESET}");
         }
 
-        if !credentials_path.exists() {
+        if credentials_path.exists() {
+            println!(
+                "{YELLOW}{BOLD}You are already logged in with your Strawberry ID.\n\
+                To log out, delete the following file: {}{C_RESET}", credentials_path.display()
+            );
+        } else {
             let credentials = Credentials {
                 username: credentials.username.clone(),
                 token: credentials.token.clone(),
@@ -62,11 +67,6 @@ pub async fn login(mut auth: StrawberryId) -> anyhow::Result<()> {
                 }
                 Err(err) => eprintln!("{RED}{BOLD}Error while serializing data:{RESET} {err}{C_RESET}"),
             }
-        } else {
-            println!(
-                "{YELLOW}{BOLD}You are already logged in with your Strawberry ID.\n\
-                To log out, delete the following file: {}{C_RESET}", credentials_path.display()
-            );
         }
 
     } else {

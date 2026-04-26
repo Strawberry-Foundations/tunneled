@@ -52,10 +52,11 @@ pub struct Args {
 }
 
 impl Args {
+    #[must_use] 
     pub fn collect() -> Self {
         let args: Vec<String> = env::args().skip(1).collect();
 
-        let mut result = Args {
+        let mut result = Self {
             args: args.clone(),
             command: Command::None,
             command_str: args.first().cloned().unwrap_or_default(),

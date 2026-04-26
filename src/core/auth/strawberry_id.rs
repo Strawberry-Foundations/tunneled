@@ -60,7 +60,8 @@ impl StrawberryId {
         Ok(self)
     }
 
-    pub fn authenticator(username: String, token: String) -> StrawberryIdAuthenticator {
+    #[must_use] 
+    pub const fn authenticator(username: String, token: String) -> StrawberryIdAuthenticator {
         StrawberryIdAuthenticator {
             username: Some(username),
             token: Some(token),
