@@ -174,7 +174,7 @@ fn parse_u16(input: Option<&String>, field: &mut u16, field_name: &str) {
 
 fn parse_string(input: Option<&String>, field: &mut String, field_name: &str) {
     if let Some(val) = input {
-        *field = val.clone();
+        field.clone_from(val);
     } else {
         eprintln!("{RED}{BOLD} ! {RESET} Missing {field_name}{C_RESET}");
     }
